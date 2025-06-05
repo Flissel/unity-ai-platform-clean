@@ -1,0 +1,143 @@
+# Traefik Dynamic Configuration
+# Advanced routing rules and middleware for Unity AI Platform
+
+http:
+  routers:
+    # API Dashboard (Traefik)
+    api:
+      rule: "Host(`traefik.unit-y-ai.io`)"
+      service: api@internal
+      middlewares:
+        - auth-basic
+        - security-headers
+      tls:
+        certResolver: letsencrypt
+    
+    # Main API Router
+    api-main:
+      rule: "Host(`api.unit-y-ai.io`)"
+      service: unityai-api
+      middlewares:
+        - rate-limit
+        - security-headers
+      tls:
+        certResolver: letsencrypt
+    
+    # n8n Workflow Editor
+    n8n-editor:
+      rule: "Host(`n8n.unit-y-ai.io`)"
+      service: unityai-n8n
+      middlewares:
+        - auth-basic
+        - security-headers
+      tls:
+        certResolver: letsencrypt
+    
+    # Prometheus Metrics
+    prometheus:
+      rule: "Host(`metrics.unit-y-ai.io`)"
+      service: unityai-prometheus
+      middlewares:
+        - auth-basic
+        - security-headers
+      tls:
+        certResolver: letsencrypt
+    
+    # Grafana Dashboard
+    grafana:
+      rule: "Host(`grafana.unit-y-ai.io`)"
+      service: unityai-grafana
+      middlewares:
+        - security-headers
+      tls:
+        certResolver: letsencrypt
+    
+    # Webhook Endpoints (no auth for external services)
+    webhooks:
+      rule: "Host(`webhooks.unit-y-ai.io`)"
+      service: unityai-api
+      middlewares:
+        - rate-limit-webhooks
+        - security-headers
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    unityai-api:
+      loadBalancer:
+        servers:
+          - url: "http://app:8000"
+        healthCheck:
+          path: "/health"
+          interval: "30s"
+          timeout: "10s"
+    
+    unityai-n8n:
+      loadBalancer:
+        servers:
+          - url: "http://n8n:5678"
+        healthCheck:
+          path: "/healthz"
+          interval: "30s"
+          timeout: "10s"
+    
+    unityai-prometheus:
+      loadBalancer:
+        servers:
+          - url: "http://prometheus:9090"
+    
+    unityai-grafana:
+      loadBalancer:
+        servers:
+          - url: "http://grafana:3000"
+
+  middlewares:
+    rate-limit-webhooks:
+      rateLimit:
+        average: 50
+        burst: 100
+        period: 1m
+    
+    cors-headers:
+      headers:
+        accessControlAllowOriginList:
+          - "https://unit-y-ai.io"
+          - "https://api.unit-y-ai.io"
+          - "https://n8n.unit-y-ai.io"
+        accessControlAllowMethods:
+          - "GET"
+          - "POST"
+          - "PUT"
+          - "DELETE"
+          - "OPTIONS"
+        accessControlAllowHeaders:
+          - "Content-Type"
+          - "Authorization"
+          - "X-API-Key"
+        accessControlMaxAge: 86400
+    
+    compress:
+      compress:
+        excludedContentTypes:
+          - "text/event-stream"
+
+tcp:
+  routers: {}
+  services: {}
+
+tls:
+  options:
+    default:
+      sslProtocols:
+        - "TLSv1.2"
+        - "TLSv1.3"
+      cipherSuites:
+        - "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384"
+        - "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305"
+        - "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"
+        - "TLS_RSA_WITH_AES_256_GCM_SHA384"
+        - "TLS_RSA_WITH_AES_128_GCM_SHA256"
+      curvePreferences:
+        - "CurveP521"
+        - "CurveP384"
+      minVersion: "VersionTLS12"
