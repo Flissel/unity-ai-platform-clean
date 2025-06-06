@@ -1,150 +1,132 @@
-version: '3.8'
 
+
+# ───────────────────────────────────────────────────────────
+# Secrets (müssen vorab per `docker secret create …` existieren)
+# ───────────────────────────────────────────────────────────
+secrets:
+  pg_pw:                 { external: true }
+  n8n_admin_password:    { external: true }
+  n8n_encryption_key:    { external: true }
+  redis_pw:              { external: true }
+  runner_token:          { external: true }
+
+# ───────────────────────────────────────────────────────────
+# Networks
+# ───────────────────────────────────────────────────────────
+networks:
+  unityai-network:
+    driver: overlay      # für Swarm (bridge, wenn single-node compose)
+
+# ───────────────────────────────────────────────────────────
+# Volumes
+# ───────────────────────────────────────────────────────────
+volumes:
+  postgres-data:
+  redis-data:
+  n8n-data:
+
+# ───────────────────────────────────────────────────────────
+# Services
+# ───────────────────────────────────────────────────────────
 services:
-  # Main UnityAI application
+
+  # ---------- PostgreSQL ----------
+  db:
+    image: postgres:15-alpine
+    secrets: [pg_pw]
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_pw
+      POSTGRES_USER: n8n_user
+      POSTGRES_DB:  n8n
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U n8n_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [unityai-network]
+
+  # ---------- Redis (Queue) ----------
+  redis:
+    image: redis:7-alpine
+    secrets: [redis_pw]
+    command: >
+      redis-server --requirepass $(cat /run/secrets/redis_pw)
+                   --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$(cat /run/secrets/redis_pw)", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [unityai-network]
+
+  # ---------- n8n Core ----------
+  n8n:
+    image: ghcr.io/Flissel/n8n:${IMAGE_TAG:-latest}
+    secrets: [pg_pw, n8n_admin_password, n8n_encryption_key, redis_pw]
+    env_file:
+      - n8n/env/.env.common
+      - n8n/env/.env.queue
+      - n8n/env/.env.nodes
+      - n8n/env/.env.security
+      - n8n/env/.env.secrets
+      - n8n/env/.env.timezone
+      - n8n/env/.env.taskrunners
+      
+    environment:
+      # Datenbank
+      DB_POSTGRESDB_PASSWORD_FILE: /run/secrets/pg_pw
+      # Basic-Auth & Encryption
+      N8N_BASIC_AUTH_PASSWORD_FILE: /run/secrets/n8n_admin_password
+      N8N_ENCRYPTION_KEY_FILE:     /run/secrets/n8n_encryption_key
+      # Redis-Passwort für Queue
+      QUEUE_BULL_REDIS_PASSWORD_FILE: /run/secrets/redis_pw
+    volumes:
+      - n8n-data:/home/node/.n8n
+    depends_on: [db, redis]
+    networks: [unityai-network]
+
+  # ---------- External Runner ----------
+  runner-launcher:
+    image: ghcr.io/Flissel/n8n:${IMAGE_TAG:-latest}
+    command: n8n runner
+    secrets: [runner_token, redis_pw]
+    env_file:
+      - n8n/env/.env.taskrunners
+    environment:
+      N8N_RUNNERS_AUTH_TOKEN_FILE: /run/secrets/runner_token
+      QUEUE_BULL_REDIS_PASSWORD_FILE: /run/secrets/redis_pw
+    deploy:
+      replicas: 1
+      restart_policy: { condition: on-failure }
+    depends_on: [redis, n8n]
+    networks: [unityai-network]
+
+  # ---------- FastAPI App ----------
   app:
     build:
       context: .
-      target: ${BUILD_TARGET:-production}  # Use development for local dev
-    container_name: unityai-app
-    restart: unless-stopped
-    ports:
-      - "${PORT:-8000}:8000"
+      target: ${BUILD_TARGET:-production}
+    secrets: [pg_pw, redis_pw]
+    env_file:
+      - .env.fastapi
+      - .env.security
+    environment:
+      DATABASE_URL: postgresql://n8n_user:$(cat /run/secrets/pg_pw)@db:5432/n8n
+      REDIS_URL:    redis://default:$(cat /run/secrets/redis_pw)@redis:6379/0
+      N8N_BASE_URL: http://n8n:5678
+      ENVIRONMENT:  production
     volumes:
-      - ./src:/app/src:ro  # Read-only in production
       - ./logs:/app/logs
       - ./uploads:/app/uploads
-    env_file:
-      - .env
-    environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-unityai}
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-}@redis:6379/0
-      - N8N_BASE_URL=http://n8n:5678
-    depends_on:
-      - db
-      - redis
-      - n8n
-    networks:
-      - unityai-network
+    depends_on: [db, redis, n8n]
+    networks: [unityai-network]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
 
-  # PostgreSQL database
-  db:
-    image: postgres:15-alpine
-    container_name: unityai-db
-    restart: unless-stopped
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
-      - POSTGRES_DB=${POSTGRES_DB:-unityai}
-    networks:
-      - unityai-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # Redis for caching and rate limiting
-  redis:
-    image: redis:7-alpine
-    container_name: unityai-redis
-    restart: unless-stopped
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
-    volumes:
-      - redis-data:/data
-    command: redis-server --appendonly yes ${REDIS_PASSWORD:+--requirepass ${REDIS_PASSWORD}}
-    networks:
-      - unityai-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # n8n workflow automation
-  n8n:
-    image: n8nio/n8n:latest
-    container_name: unityai-n8n
-    restart: unless-stopped
-    ports:
-      - "${N8N_PORT:-5678}:5678"
-    volumes:
-      - n8n-data:/home/node/.n8n
-    environment:
-      - N8N_PORT=5678
-      - N8N_PROTOCOL=http
-      - N8N_HOST=n8n
-      - N8N_EDITOR_BASE_URL=http://localhost:5678
-      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY:-n8n-encryption-key}
-      - N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE:-true}
-      - N8N_BASIC_AUTH_USER=${N8N_BASIC_AUTH_USER:-admin}
-      - N8N_BASIC_AUTH_PASSWORD=${N8N_BASIC_AUTH_PASSWORD:-admin}
-      - DB_TYPE=postgresdb
-      - DB_POSTGRESDB_HOST=db
-      - DB_POSTGRESDB_PORT=5432
-      - DB_POSTGRESDB_DATABASE=${POSTGRES_DB:-unityai}
-      - DB_POSTGRESDB_USER=${POSTGRES_USER:-postgres}
-      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD:-postgres}
-      - DB_POSTGRESDB_SCHEMA=n8n
-    networks:
-      - unityai-network
-    depends_on:
-      - db
-
-  # Prometheus for metrics collection
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: unityai-prometheus
-    restart: unless-stopped
-    ports:
-      - "${PROMETHEUS_PORT:-9090}:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus-data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-      - '--web.console.templates=/usr/share/prometheus/consoles'
-    networks:
-      - unityai-network
-
-  # Grafana for metrics visualization
-  grafana:
-    image: grafana/grafana:latest
-    container_name: unityai-grafana
-    restart: unless-stopped
-    ports:
-      - "${GRAFANA_PORT:-3000}:3000"
-    volumes:
-      - grafana-data:/var/lib/grafana
-    environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
-      - GF_USERS_ALLOW_SIGN_UP=false
-    networks:
-      - unityai-network
-    depends_on:
-      - prometheus
-
-volumes:
-  postgres-data:
-  redis-data:
-  n8n-data:
-  prometheus-data:
-  grafana-data:
-
-networks:
-  unityai-network:
-    driver: bridge
