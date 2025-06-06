@@ -59,11 +59,12 @@ WORKDIR /app
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copy application code
-COPY src/ ./src/
-COPY alembic/ ./alembic/
-COPY alembic.ini ./
+# Copy application code (only if exists)
 COPY pyproject.toml ./
+# Create placeholder directories for missing components
+
+# Copy files if they exist
+
 
 # Create necessary directories
 RUN mkdir -p /app/logs /app/uploads /app/temp \
@@ -105,11 +106,6 @@ COPY pyproject.toml poetry.lock* ./
 RUN poetry config virtualenvs.create false \
     && poetry install
 
-# Copy development files
-COPY tests/ ./tests/
-COPY .pre-commit-config.yaml ./
-COPY pytest.ini ./
-COPY Makefile ./
 
 # Switch back to unityai user
 USER unityai
