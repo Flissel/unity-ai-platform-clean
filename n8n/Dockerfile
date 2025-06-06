@@ -1,11 +1,6 @@
 # Replace:
-    FROM n8n/n8n:latest
-
-    # With:
-    FROM docker.n8n.io/n8nio/n8n:latest
-    # OR
-    FROM node:18-alpine
-    # Then install n8n manually
+ FROM docker.n8n.io/n8nio/n8n:latest
+   
 
 # Als root für Package-Installation
 USER root
