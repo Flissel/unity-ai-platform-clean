@@ -68,7 +68,6 @@ services:
     image: ghcr.io/Flissel/n8n:${IMAGE_TAG:-latest}
     secrets: [pg_pw, n8n_admin_password, n8n_encryption_key, redis_pw]
     env_file:
-      - ../n8n/env/.env.common
       - ../n8n/env/.env.queue
       - ../n8n/env/.env.nodes
       - ../n8n/env/.env.security
@@ -77,8 +76,7 @@ services:
       - ../n8n/env/.env.taskrunners
       - ../n8n/env/.env.database
       - ../n8n/env/.env.deployment
-      -../n8n/env/.env.webhooks
-      -../n8n/env/.env.license
+  
       
     environment:
       # Datenbank
