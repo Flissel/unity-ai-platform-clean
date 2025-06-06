@@ -18,20 +18,20 @@ RUN apk add --no-cache \
     python3-dev \
     && ln -sf python3 /usr/bin/python
 
-# Python ML-Libraries installieren
-RUN pip3 install --no-cache-dir \
+# Python ML-Libraries installieren (mit --break-system-packages für Alpine)
+RUN pip3 install --no-cache-dir --break-system-packages \
     pandas==2.1.4 \
     numpy==1.24.4 \
     scikit-learn==1.3.2 \
-    pdf-lib \
-    puppeteer
-
-# Zusätzliche nützliche Libraries für Automation
-RUN pip3 install --no-cache-dir \
     requests==2.31.0 \
     beautifulsoup4==4.12.2 \
     openpyxl==3.1.2 \
     python-dateutil==2.8.2
+
+# Node.js packages für Automation
+RUN npm install -g \
+    puppeteer \
+    pdf-lib
 
 # Zurück zu n8n User für Sicherheit
 USER node
