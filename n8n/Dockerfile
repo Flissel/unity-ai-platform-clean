@@ -1,44 +1,32 @@
-# Replace:
-    FROM n8n/n8n:latest
+# Use official n8n image as base
+FROM docker.n8n.io/n8nio/n8n:latest
 
-    # With:
-    FROM docker.n8n.io/n8nio/n8n:latest
-    # OR
-    FROM node:18-alpine
-    # Then install n8n manually
-
-# Als root für Package-Installation
+# Switch to root for package installation
 USER root
 
-# Python und Build-Dependencies installieren
+# Install Python and basic dependencies (avoid complex ML packages)
 RUN apk add --no-cache \
     python3 \
     py3-pip \
-    g++ \
-    python3-dev \
     && ln -sf python3 /usr/bin/python
 
-# Python ML-Libraries installieren (mit --break-system-packages für Alpine)
+# Install only essential Python packages that work well with Alpine
 RUN pip3 install --no-cache-dir --break-system-packages \
-    pandas==2.1.4 \
-    numpy==1.24.4 \
-    scikit-learn==1.3.2 \
     requests==2.31.0 \
     beautifulsoup4==4.12.2 \
-    openpyxl==3.1.2 \
     python-dateutil==2.8.2
 
-# Node.js packages für Automation
+# Install Node.js packages for automation
 RUN npm install -g \
     puppeteer \
     pdf-lib
 
-# Zurück zu n8n User für Sicherheit
+# Switch back to n8n user for security
 USER node
 
-# Gesundheitscheck
+# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:5678/healthz || exit 1
 
-# Standard n8n Entrypoint beibehalten
+# Keep standard n8n entrypoint
 ENTRYPOINT ["tini", "--", "/docker-entrypoint.sh"]

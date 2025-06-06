@@ -21,16 +21,11 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy dependency files
-COPY pyproject.toml poetry.lock* ./
+COPY pyproject.toml requirements.txt* ./
 
-# Install Poetry
-RUN pip install poetry==1.6.1
-
-# Configure Poetry
-RUN poetry config virtualenvs.create false
-
-# Install dependencies
-RUN poetry install --only=main --no-dev
+# Install dependencies using pip
+RUN pip install --no-cache-dir -r requirements.txt || \
+    pip install --no-cache-dir -e .
 
 # Production stage
 FROM python:3.11-slim as production
