@@ -68,13 +68,17 @@ services:
     image: ghcr.io/Flissel/n8n:${IMAGE_TAG:-latest}
     secrets: [pg_pw, n8n_admin_password, n8n_encryption_key, redis_pw]
     env_file:
-      - n8n/env/.env.common
-      - n8n/env/.env.queue
-      - n8n/env/.env.nodes
-      - n8n/env/.env.security
-      - n8n/env/.env.secrets
-      - n8n/env/.env.timezone
-      - n8n/env/.env.taskrunners
+      - ../n8n/env/.env.common
+      - ../n8n/env/.env.queue
+      - ../n8n/env/.env.nodes
+      - ../n8n/env/.env.security
+      - ../n8n/env/.env.secrets
+      - ../n8n/env/.env.timezone
+      - ../n8n/env/.env.taskrunners
+      - ../n8n/env/.env.database
+      - ../n8n/env/.env.deployment
+      -../n8n/env/.env.webhooks
+      -../n8n/env/.env.license
       
     environment:
       # Datenbank
@@ -95,7 +99,7 @@ services:
     command: n8n runner
     secrets: [runner_token, redis_pw]
     env_file:
-      - n8n/env/.env.taskrunners
+      - ../n8n/env/.env.taskrunners
     environment:
       N8N_RUNNERS_AUTH_TOKEN_FILE: /run/secrets/runner_token
       QUEUE_BULL_REDIS_PASSWORD_FILE: /run/secrets/redis_pw
@@ -108,20 +112,21 @@ services:
   # ---------- FastAPI App ----------
   app:
     build:
-      context: .
+      context: ../fastapi
+      dockerfile: Dockerfile
       target: ${BUILD_TARGET:-production}
     secrets: [pg_pw, redis_pw]
     env_file:
-      - .env.fastapi
-      - .env.security
+      - ../.env.fastapi
+      - ../.env.security
     environment:
       DATABASE_URL: postgresql://n8n_user:$(cat /run/secrets/pg_pw)@db:5432/n8n
       REDIS_URL:    redis://default:$(cat /run/secrets/redis_pw)@redis:6379/0
       N8N_BASE_URL: http://n8n:5678
       ENVIRONMENT:  production
     volumes:
-      - ./logs:/app/logs
-      - ./uploads:/app/uploads
+      - ../logs:/app/logs
+      - ../uploads:/app/uploads
     depends_on: [db, redis, n8n]
     networks: [unityai-network]
     healthcheck:
