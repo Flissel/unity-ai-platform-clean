@@ -9,7 +9,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 LOG_FILE="/var/log/unityai-deploy.log"
 BACKUP_DIR="/opt/unityai/backups"
-DOCKER_COMPOSE_FILE="docker-compose.prod.yml"
+DOCKER_COMPOSE_FILE="$PROJECT_DIR/compose/docker-compose.prod.yml"
+ENV_FILE="$PROJECT_DIR/config/.env.production"
 MAX_ROLLBACK_ATTEMPTS=3
 
 # Colors for output
@@ -42,9 +43,30 @@ if [[ $EUID -eq 0 ]]; then
     exit 1
 fi
 
+# Load environment configuration
+load_environment() {
+    info "Loading environment configuration..."
+    
+    if [[ ! -f "$ENV_FILE" ]]; then
+        error "Environment file not found: $ENV_FILE"
+        error "Please run setup-production.sh first to generate configuration"
+        exit 1
+    fi
+    
+    # Source environment file
+    set -a
+    source "$ENV_FILE"
+    set +a
+    
+    success "Environment configuration loaded"
+}
+
 # Check prerequisites
 check_prerequisites() {
     info "Checking prerequisites..."
+    
+    # Load environment first
+    load_environment
     
     # Check if Docker is installed and running
     if ! command -v docker &> /dev/null; then

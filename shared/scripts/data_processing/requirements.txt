@@ -1,0 +1,37 @@
+# Data Processing Requirements
+# Core data analysis libraries
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# Statistical analysis
+statsmodels>=0.14.0
+scikit-learn>=1.3.0
+
+# Data visualization (optional)
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.15.0
+
+# File format support
+openpyxl>=3.1.0  # Excel files
+xlrd>=2.0.0      # Excel files (legacy)
+pyarrow>=12.0.0  # Parquet files
+fastparquet>=2023.4.0  # Parquet files (alternative)
+
+# Database connectivity
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0  # PostgreSQL
+pymongo>=4.4.0          # MongoDB
+
+# Data validation
+pydantic>=2.0.0
+cerberus>=1.3.0
+
+# Performance optimization
+numba>=0.57.0
+dask>=2023.6.0
+
+# Utilities
+tqdm>=4.65.0     # Progress bars
+click>=8.1.0     # CLI utilities

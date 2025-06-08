@@ -1,0 +1,195 @@
+# Notification Sending Script Dependencies
+# Core libraries for various notification channels
+
+# HTTP requests and API communication
+requests>=2.31.0
+httpx>=0.24.0
+aiohttp>=3.8.0
+
+# Email sending (built-in libraries, but listing for completeness)
+# smtplib - built-in
+# email - built-in
+
+# SMS providers
+twilio>=8.5.0
+nexmo>=2.5.2  # Vonage
+
+# Push notifications
+pyfcm>=1.5.4  # Firebase Cloud Messaging
+
+# Desktop notifications
+plyer>=2.1.0  # Cross-platform notifications
+
+# Slack integration
+slack-sdk>=3.21.0
+slack-bolt>=1.18.0
+
+# Discord integration
+discord.py>=2.3.0
+discord-webhook>=1.3.0
+
+# Microsoft Teams
+pymsteams>=0.2.2
+
+# Telegram
+python-telegram-bot>=20.3
+
+# Data handling and validation
+pandas>=2.0.0
+numpy>=1.24.0
+pydantic>=2.0.0
+cerberus>=1.3.4
+jsonschema>=4.17.0
+
+# File handling and utilities
+aiofiles>=23.1.0
+filetype>=1.2.0
+python-magic>=0.4.27
+chardet>=5.1.0
+
+# Image and file processing for attachments
+Pillow>=10.0.0
+python-magic-bin>=0.4.14  # Windows binary for python-magic
+
+# Async processing
+asyncio-mqtt>=0.13.0
+
+# Security and authentication
+cryptography>=41.0.0
+PyJWT>=2.8.0
+oauthlib>=3.2.2
+requests-oauthlib>=1.3.1
+
+# URL and data utilities
+furl>=2.1.3
+urllib3>=2.0.0
+
+# Rate limiting and retry
+ratelimit>=2.2.1
+retrying>=1.3.4
+backoff>=2.2.1
+
+# Logging and monitoring
+structlog>=23.1.0
+rich>=13.4.0
+coloredlogs>=15.0.1
+
+# Configuration management
+python-dotenv>=1.0.0
+PyYAML>=6.0
+toml>=0.10.2
+
+# Date and time handling
+python-dateutil>=2.8.2
+pytz>=2023.3
+
+# Performance and utilities
+tqdm>=4.65.0
+click>=8.1.0
+
+# Testing and development
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+responses>=0.23.0
+requests-mock>=1.11.0
+
+# Optional: Advanced notification features
+# Webhook validation
+hmac  # built-in
+hashlib  # built-in
+
+# Template rendering for rich notifications
+Jinja2>=3.1.0
+markdown>=3.4.0
+
+# QR code generation for notifications
+qrcode>=7.4.0
+
+# Barcode generation
+python-barcode>=0.14.0
+
+# Calendar integration
+icalendar>=5.0.0
+
+# Geolocation for location-based notifications
+geopy>=2.3.0
+
+# Weather data for contextual notifications
+requests-cache>=1.1.0
+
+# Database connectivity for notification logs
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+pymongo>=4.4.0
+redis>=4.6.0
+
+# Message queuing
+celery>=5.3.0
+kombu>=5.3.0
+
+# Monitoring and metrics
+prometheus-client>=0.17.0
+
+# Internationalization
+babel>=2.12.0
+
+# HTML parsing for rich email content
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+html5lib>=1.1
+
+# PDF generation for attachments
+reportlab>=4.0.0
+weasyprint>=59.0
+
+# Excel file handling for attachments
+openpyxl>=3.1.0
+xlsxwriter>=3.1.0
+
+# CSV handling
+csv  # built-in
+
+# JSON handling
+json  # built-in
+orjson>=3.9.0  # Fast JSON library
+
+# XML handling
+xml.etree.ElementTree  # built-in
+lxml>=4.9.0
+
+# Compression for attachments
+zipfile  # built-in
+tarfile  # built-in
+gzip  # built-in
+
+# Base64 encoding/decoding
+base64  # built-in
+
+# MIME type detection
+mimetypes  # built-in
+
+# Platform detection
+platform  # built-in
+
+# Subprocess for system notifications
+subprocess  # built-in
+
+# Threading for concurrent notifications
+threading  # built-in
+concurrent.futures  # built-in
+
+# Regular expressions
+re  # built-in
+
+# Path handling
+pathlib  # built-in
+os  # built-in
+sys  # built-in
+
+# Time handling
+time  # built-in
+datetime  # built-in
+
+# Type hints
+typing  # built-in
+typing_extensions>=4.7.0

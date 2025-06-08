@@ -5,6 +5,10 @@
 .env.production
 .env.development
 
+# CRITICAL SECURITY FILES - NEVER COMMIT!
+config/secrets.env
+SECRETS_BACKUP.txt
+
 # Sensitive configuration files
 *.key
 *.pem

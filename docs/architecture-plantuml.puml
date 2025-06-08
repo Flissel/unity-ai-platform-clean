@@ -1,0 +1,211 @@
+@startuml Unity AI Platform Architecture
+!theme plain
+title Unity AI Platform - Microservices Architecture
+
+!define RECTANGLE class
+!define COMPONENT component
+!define DATABASE database
+!define QUEUE queue
+!define CLOUD cloud
+!define ACTOR actor
+
+' External Layer
+CLOUD "Internet" as internet
+ACTOR "Users" as users
+ACTOR "API Clients" as clients
+ACTOR "Webhooks" as webhooks
+
+' Reverse Proxy Layer
+package "Reverse Proxy & Load Balancing" {
+  COMPONENT "Traefik" as traefik {
+    note right: SSL/TLS Termination\nLoad Balancing\nService Discovery\nRate Limiting
+  }
+}
+
+' Application Services Layer
+package "Application Services" {
+  COMPONENT "Unity AI App" as unityai {
+    note right: FastAPI Application\nREST API Endpoints\nAuthentication\nBusiness Logic
+  }
+  
+  COMPONENT "n8n Core" as n8n_core {
+    note right: Workflow Engine\nWeb Interface\nWorkflow Management\nScheduler
+  }
+  
+  COMPONENT "n8n Worker" as n8n_worker {
+    note right: Queue Worker\nWorkflow Execution\nML Libraries\nPython Scripts
+  }
+  
+  COMPONENT "Python Worker" as python_worker {
+    note right: Background Tasks\nData Processing\nML Inference\nScript Execution
+  }
+}
+
+' Shared Resources
+package "Shared Scripts & Libraries" {
+  COMPONENT "Data Processing" as data_scripts
+  COMPONENT "ML Inference" as ml_scripts
+  COMPONENT "Web Scraping" as scraping_scripts
+  COMPONENT "Document Processing" as doc_scripts
+  COMPONENT "Image Processing" as img_scripts
+  COMPONENT "API Integration" as api_scripts
+  COMPONENT "Notifications" as notification_scripts
+  COMPONENT "Common Libraries" as common_libs
+}
+
+' Data & Queue Layer
+package "Data & Queue Layer" {
+  DATABASE "PostgreSQL" as postgres {
+    note right: Primary Database\nn8n Workflows\nUser Data\nConfiguration
+  }
+  
+  QUEUE "Redis" as redis {
+    note right: Queue Management\nSession Storage\nCaching\nPub/Sub
+  }
+  
+  DATABASE "Docker Volumes" as volumes {
+    note right: Persistent Storage\nFile Uploads\nLogs\nBackups
+  }
+}
+
+' Monitoring Layer
+package "Monitoring & Observability" {
+  COMPONENT "Prometheus" as prometheus {
+    note right: Metrics Collection\nTime Series DB\nAlerting Rules
+  }
+  
+  COMPONENT "Grafana" as grafana {
+    note right: Dashboards\nVisualization\nAlerting\nReporting
+  }
+  
+  COMPONENT "Logs" as logs {
+    note right: Centralized Logging\nLog Aggregation\nLog Analysis
+  }
+}
+
+' Security Layer
+package "Security & Configuration" {
+  COMPONENT "Docker Secrets" as secrets
+  COMPONENT "Environment Files" as env_files
+  COMPONENT "SSL/TLS Certificates" as certificates
+  COMPONENT "Authentication" as auth
+  COMPONENT "Rate Limiting" as rate_limit
+}
+
+' Network Layer
+package "Docker Network" {
+  COMPONENT "Overlay Network" as network {
+    note right: Service Discovery\nInternal Communication\nNetwork Isolation
+  }
+}
+
+' External Connections
+internet --> traefik : HTTPS/443
+users --> traefik : Web Interface
+clients --> traefik : API Calls
+webhooks --> traefik : Webhook Events
+
+' Traefik Routing
+traefik --> unityai : /api/*
+traefik --> n8n_core : /n8n/*
+traefik --> grafana : /grafana/*
+
+' Application Service Connections
+unityai --> postgres : Database Queries
+unityai --> redis : Cache/Sessions
+unityai --> python_worker : Task Queue
+
+n8n_core --> postgres : Workflow Storage
+n8n_core --> redis : Queue Management
+n8n_core --> n8n_worker : Job Execution
+
+n8n_worker --> redis : Job Queue
+n8n_worker --> data_scripts : Execute Scripts
+n8n_worker --> ml_scripts : ML Processing
+n8n_worker --> scraping_scripts : Web Scraping
+n8n_worker --> doc_scripts : Document Processing
+n8n_worker --> img_scripts : Image Processing
+n8n_worker --> api_scripts : API Calls
+n8n_worker --> notification_scripts : Send Notifications
+
+python_worker --> redis : Task Queue
+python_worker --> postgres : Data Storage
+python_worker --> common_libs : Shared Utilities
+
+' Shared Resources Dependencies
+data_scripts --> common_libs
+ml_scripts --> common_libs
+scraping_scripts --> common_libs
+doc_scripts --> common_libs
+img_scripts --> common_libs
+api_scripts --> common_libs
+notification_scripts --> common_libs
+
+' Monitoring Connections
+prometheus --> unityai : Metrics
+prometheus --> n8n_core : Metrics
+prometheus --> n8n_worker : Metrics
+prometheus --> python_worker : Metrics
+prometheus --> postgres : Metrics
+prometheus --> redis : Metrics
+prometheus --> traefik : Metrics
+
+grafana --> prometheus : Query Metrics
+logs <-- unityai : Application Logs
+logs <-- n8n_core : Workflow Logs
+logs <-- n8n_worker : Execution Logs
+logs <-- python_worker : Task Logs
+
+' Security Connections
+secrets --> unityai : API Keys
+secrets --> n8n_core : Database Credentials
+secrets --> postgres : Admin Password
+env_files --> unityai : Configuration
+env_files --> n8n_core : Configuration
+certificates --> traefik : SSL/TLS
+auth --> traefik : Authentication
+rate_limit --> traefik : Rate Limiting
+
+' Network Layer
+network --> unityai
+network --> n8n_core
+network --> n8n_worker
+network --> python_worker
+network --> postgres
+network --> redis
+network --> prometheus
+network --> grafana
+
+' Styling
+skinparam component {
+  BackgroundColor LightBlue
+  BorderColor DarkBlue
+}
+
+skinparam database {
+  BackgroundColor LightGreen
+  BorderColor DarkGreen
+}
+
+skinparam queue {
+  BackgroundColor LightYellow
+  BorderColor Orange
+}
+
+skinparam cloud {
+  BackgroundColor LightGray
+  BorderColor Gray
+}
+
+skinparam actor {
+  BackgroundColor LightPink
+  BorderColor Red
+}
+
+skinparam package {
+  BackgroundColor White
+  BorderColor Black
+  FontStyle bold
+}
+
+@enduml
