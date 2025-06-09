@@ -118,15 +118,8 @@ collect_configuration() {
     # JWT secret
     JWT_SECRET=$(generate_jwt_secret)
     
-    # Grafana configuration
-    prompt_input "Enter Grafana admin password (leave empty to auto-generate)" GRAFANA_PASSWORD
-    if [[ -z "$GRAFANA_PASSWORD" ]]; then
-        GRAFANA_PASSWORD=$(generate_password)
-        info "Generated Grafana admin password: $GRAFANA_PASSWORD"
-    fi
-    
-    # Traefik basic auth
-    TRAEFIK_AUTH=$(create_htpasswd "admin" "$GRAFANA_PASSWORD")
+    # Create Traefik basic auth for admin access
+TRAEFIK_AUTH=$(create_htpasswd "admin" "admin")
     
     # API key
     API_KEY=$(generate_password)
@@ -159,7 +152,7 @@ API_DOMAIN=api.$DOMAIN
 N8N_DOMAIN=n8n.$DOMAIN
 WEBHOOK_DOMAIN=webhooks.$DOMAIN
 TRAEFIK_DOMAIN=traefik.$DOMAIN
-GRAFANA_DOMAIN=grafana.$DOMAIN
+
 METRICS_DOMAIN=metrics.$DOMAIN
 
 # Cloudflare DNS API (for Let's Encrypt ACME)
@@ -214,8 +207,7 @@ CORS_ORIGINS=https://$DOMAIN,https://api.$DOMAIN,https://n8n.$DOMAIN
 # =============================================================================
 # MONITORING AND OBSERVABILITY
 # =============================================================================
-GRAFANA_ADMIN_USER=admin
-GRAFANA_ADMIN_PASSWORD=$GRAFANA_PASSWORD
+
 
 # =============================================================================
 # TRAEFIK CONFIGURATION
@@ -258,8 +250,7 @@ setup_directories() {
         "$PROJECT_DIR/uploads"
         "$PROJECT_DIR/temp"
         "$PROJECT_DIR/backups"
-        "$PROJECT_DIR/grafana/dashboards"
-        "$PROJECT_DIR/grafana/datasources"
+        
         "/opt/unityai/backups"
     )
     
@@ -267,6 +258,8 @@ setup_directories() {
         mkdir -p "$dir"
         info "Created directory: $dir"
     done
+    
+
     
     success "Directory setup completed"
 }
@@ -445,12 +438,12 @@ display_final_info() {
     info "Domain: $DOMAIN"
     info "API URL: https://api.$DOMAIN"
     info "n8n URL: https://n8n.$DOMAIN"
-    info "Grafana URL: https://grafana.$DOMAIN"
+    
     info "Traefik Dashboard: https://traefik.$DOMAIN"
     echo
     info "=== CREDENTIALS ==="
     info "n8n Admin: $N8N_ADMIN_USER / $N8N_ADMIN_PASSWORD"
-    info "Grafana Admin: admin / $GRAFANA_PASSWORD"
+    
     info "API Key: $API_KEY"
     echo
     info "=== NEXT STEPS ==="

@@ -128,7 +128,7 @@ celery>=5.3.0
 kombu>=5.3.0
 
 # Monitoring and metrics
-prometheus-client>=0.17.0
+
 
 # Internationalization
 babel>=2.12.0

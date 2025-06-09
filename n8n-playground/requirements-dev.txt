@@ -1,0 +1,100 @@
+# Development Dependencies for n8n API Playground
+
+# Testing frameworks and tools
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+pytest-xdist==3.5.0
+pytest-html==4.1.1
+pytest-benchmark==4.0.0
+factory-boy==3.3.0
+faker==20.1.0
+
+# Code quality and formatting
+black==23.11.0
+isort==5.12.0
+flake8==6.1.0
+flake8-docstrings==1.7.0
+flake8-import-order==0.18.2
+flake8-bugbear==23.11.28
+mypy==1.7.1
+pylint==3.0.3
+bandit==1.7.5
+safety==2.3.5
+
+# Pre-commit hooks
+pre-commit==3.6.0
+
+# Documentation
+mkdocs==1.5.3
+mkdocs-material==9.4.8
+mkdocstrings==0.24.0
+mkdocstrings-python==1.7.5
+mkdocs-mermaid2-plugin==1.1.1
+
+# Development tools
+ipython==8.17.2
+ipdb==0.13.13
+rich==13.7.0
+watchdog==3.0.0
+
+# API testing
+httpx==0.25.2
+requests-mock==1.11.0
+responses==0.24.1
+
+# Database testing
+pytest-postgresql==5.0.0
+pytest-redis==3.0.2
+sqlalchemy-utils==0.41.1
+
+# Load testing
+locust==2.17.0
+
+# Security testing
+bandit[toml]==1.7.5
+semgrep==1.45.0
+
+# Performance profiling
+py-spy==0.3.14
+memory-profiler==0.61.0
+line-profiler==4.1.1
+
+# Debugging
+debugpy==1.8.0
+pudb==2023.1
+
+# Environment management
+python-dotenv==1.0.0
+
+# Type checking
+types-redis==4.6.0.11
+types-requests==2.31.0.10
+types-PyYAML==6.0.12.12
+types-python-dateutil==2.8.19.14
+
+# Jupyter notebooks (for data analysis)
+jupyter==1.0.0
+jupyterlab==4.0.9
+notebook==7.0.6
+
+# Data visualization (for development insights)
+matplotlib==3.8.2
+seaborn==0.13.0
+plotly==5.17.0
+
+# Development utilities
+tqdm==4.66.1
+colorama==0.4.6
+termcolor==2.4.0
+
+# Mock and stub tools
+responses==0.24.1
+vcrpy==5.1.0
+
+# Configuration management
+dynaconf==3.2.4
+
+# Development server tools
+werkzeug==3.0.1

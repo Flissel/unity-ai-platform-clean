@@ -20,11 +20,12 @@ docker-compose up -d
 # Access services
 # - FastAPI: http://localhost:8000
 # - n8n: http://localhost:5678
-# - Grafana: http://localhost:3000
+
 ```
 
 ### Production Deployment
 
+#### Standard Docker Compose
 ```bash
 # 1. Configure production environment
 ./scripts/setup-production.sh
@@ -35,7 +36,27 @@ docker-compose up -d
 # 3. Access services
 # - API: https://api.unit-y-ai.io
 # - n8n: https://n8n.unit-y-ai.io
-# - Grafana: https://grafana.unit-y-ai.io
+```
+
+#### Docker Swarm Deployment
+```bash
+# 1. Initialize Docker Swarm (if not already done)
+docker swarm init
+
+# 2. Create external networks
+docker network create --driver overlay --attachable traefik-public
+
+# 3. Configure secrets
+cp .env.secrets.example .env.secrets
+# Edit .env.secrets with your actual values
+
+# 4. Deploy to Swarm
+./scripts/deploy-swarm.sh
+
+# 5. Access services
+# - API: https://api.unit-y-ai.io
+# - n8n: https://n8n.unit-y-ai.io
+# - Traefik Dashboard: https://traefik.unit-y-ai.io
 ```
 
 ## 📋 Table of Contents
@@ -75,10 +96,7 @@ graph TB
         R[Redis]
     end
     
-    subgraph "Monitoring"
-        G[Grafana]
-        PR[Prometheus]
-    end
+
     
     U --> T
     T --> F
@@ -114,8 +132,7 @@ graph TB
 - **SSL/TLS**: Automatic certificate management with Let's Encrypt
 
 ### Monitoring & Observability
-- **Prometheus Metrics**: Application and infrastructure monitoring
-- **Grafana Dashboards**: Visual monitoring and alerting
+- **Application Monitoring**: Infrastructure and service monitoring
 - **Health Checks**: Comprehensive service health monitoring
 - **Structured Logging**: JSON-formatted logs with correlation IDs
 - **Performance Tracking**: Request timing and resource usage metrics
@@ -237,7 +254,7 @@ OPENAI_API_KEY=your-openai-key
 - **FastAPI**: Configuration in `fastapi/main.py`
 - **n8n**: Environment variables in Docker Compose
 - **Traefik**: Configuration in `traefik/traefik.yml`
-- **Grafana**: Dashboards in `grafana/dashboards/`
+
 
 ## 📚 API Documentation
 
@@ -257,7 +274,7 @@ curl -H "X-API-Key: your-api-key" https://api.unit-y-ai.io/api/v1/health
 ### Core Endpoints
 
 - `GET /health` - Health check
-- `GET /metrics` - Prometheus metrics
+- `GET /metrics` - Application metrics
 - `POST /api/v1/workflows/trigger` - Trigger n8n workflow
 - `GET /api/v1/workflows/{id}/status` - Get workflow status
 - `POST /api/v1/data/process` - Process data
@@ -265,9 +282,9 @@ curl -H "X-API-Key: your-api-key" https://api.unit-y-ai.io/api/v1/health
 
 ## 📊 Monitoring
 
-### Grafana Dashboards
+### Application Monitoring
 
-Access monitoring at https://grafana.unit-y-ai.io
+Access monitoring through the application dashboard
 
 **Default Credentials:**
 - Username: `admin`
@@ -428,7 +445,7 @@ The platform supports zero-downtime deployments using:
 # Check all services
 curl https://api.unit-y-ai.io/health
 curl https://n8n.unit-y-ai.io/healthz
-curl https://grafana.unit-y-ai.io/api/health
+curl https://api.unit-y-ai.io/health
 
 # Check internal services
 docker-compose exec fastapi curl http://localhost:8000/health

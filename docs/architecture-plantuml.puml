@@ -70,13 +70,7 @@ package "Data & Queue Layer" {
 
 ' Monitoring Layer
 package "Monitoring & Observability" {
-  COMPONENT "Prometheus" as prometheus {
-    note right: Metrics Collection\nTime Series DB\nAlerting Rules
-  }
-  
-  COMPONENT "Grafana" as grafana {
-    note right: Dashboards\nVisualization\nAlerting\nReporting
-  }
+
   
   COMPONENT "Logs" as logs {
     note right: Centralized Logging\nLog Aggregation\nLog Analysis
@@ -108,7 +102,7 @@ webhooks --> traefik : Webhook Events
 ' Traefik Routing
 traefik --> unityai : /api/*
 traefik --> n8n_core : /n8n/*
-traefik --> grafana : /grafana/*
+
 
 ' Application Service Connections
 unityai --> postgres : Database Queries
@@ -142,15 +136,7 @@ api_scripts --> common_libs
 notification_scripts --> common_libs
 
 ' Monitoring Connections
-prometheus --> unityai : Metrics
-prometheus --> n8n_core : Metrics
-prometheus --> n8n_worker : Metrics
-prometheus --> python_worker : Metrics
-prometheus --> postgres : Metrics
-prometheus --> redis : Metrics
-prometheus --> traefik : Metrics
 
-grafana --> prometheus : Query Metrics
 logs <-- unityai : Application Logs
 logs <-- n8n_core : Workflow Logs
 logs <-- n8n_worker : Execution Logs
@@ -173,8 +159,7 @@ network --> n8n_worker
 network --> python_worker
 network --> postgres
 network --> redis
-network --> prometheus
-network --> grafana
+
 
 ' Styling
 skinparam component {

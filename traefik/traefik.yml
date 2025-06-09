@@ -62,11 +62,7 @@ accessLog:
         Authorization: drop
         Content-Type: keep
 
-metrics:
-  prometheus:
-    addEntryPointsLabels: true
-    addServicesLabels: true
-    addRoutersLabels: true
+
 
 # Security headers and middleware
 http:

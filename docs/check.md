@@ -102,17 +102,9 @@ docker service logs unityai-db kein Crash
 docker exec redis redis-cli -a <PW> ping → PONG
 
 6️⃣ Monitoring & Observability
-Prometheus
 
-Scrape‐Jobs für n8n, FastAPI, Redis, Postgres, Traefik
 
-Alert-Rules für Queue-Lag, fehlende Heartbeats
 
-Grafana
-
-Dashboards zur Übersicht
-
-Admin-User aus Secret (GRAFANA_ADMIN_PASSWORD)
 
 Central Logs (optional ELK/Fluentd)
 
@@ -122,7 +114,7 @@ Check:
 
 https://metrics.unit-y-ai.io/targets → alle Targets UP
 
-Grafana-Login mit GF_SECURITY_ADMIN_PASSWORD.
+
 
 7️⃣ Security & Configuration
 Docker Secrets für alle sensitiven Werte:
@@ -177,7 +169,7 @@ Sicher alle Passwörter und Keys per Docker Secrets verwaltest
 
 Modular per .env.* konfigurierst und leicht erweiterst
 
-Beobachtbar mit Prometheus & Grafana arbeitest
+Beobachtbar mit Monitoring arbeitest
 
 Automatisiert via GitHub Actions buildest und deployst
 

@@ -133,7 +133,7 @@ ignore_missing_imports = true
 module = [
     "autogen.*",
     "n8n.*",
-    "prometheus_client.*",
+
     "redis.*",
     "sqlalchemy.*",
     "alembic.*",

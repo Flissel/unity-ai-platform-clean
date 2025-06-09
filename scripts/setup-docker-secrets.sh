@@ -181,13 +181,7 @@ setup_production_secrets() {
     create_secret_if_not_exists "cloudflare_email" "$CLOUDFLARE_EMAIL" "Cloudflare email"
     create_secret_if_not_exists "cloudflare_token" "$CLOUDFLARE_TOKEN" "Cloudflare DNS API token"
     
-    # Grafana secrets
-    if [[ "$GRAFANA_ADMIN_PASSWORD" == *"CHANGE-THIS"* ]]; then
-        GRAFANA_ADMIN_PASSWORD=$(generate_secure_password 16)
-        log_info "Generated secure Grafana admin password"
-    fi
-    create_secret_if_not_exists "grafana_admin_user" "$GRAFANA_ADMIN_USER" "Grafana admin username"
-    create_secret_if_not_exists "grafana_admin_password" "$GRAFANA_ADMIN_PASSWORD" "Grafana admin password"
+
     
     log_success "All Docker secrets created successfully!"
 }
@@ -240,10 +234,6 @@ show_credentials() {
     echo "  Admin Password: $N8N_ADMIN_PASSWORD"
     echo "  URL: https://$N8N_DOMAIN"
     echo
-    echo "Grafana Monitoring:"
-    echo "  Admin User: $GRAFANA_ADMIN_USER"
-    echo "  Admin Password: $GRAFANA_ADMIN_PASSWORD"
-    echo "  URL: https://$GRAFANA_DOMAIN"
     echo
     echo "FastAPI Application:"
     echo "  URL: https://$API_DOMAIN"
@@ -262,7 +252,7 @@ secure_cleanup() {
     # Clear environment variables from memory
     unset POSTGRES_PASSWORD REDIS_PASSWORD SECRET_KEY N8N_ADMIN_PASSWORD
     unset N8N_ENCRYPTION_KEY N8N_API_KEY OPENAI_API_KEY CLOUDFLARE_TOKEN
-    unset GRAFANA_ADMIN_PASSWORD CLOUDFLARE_EMAIL
+    unset CLOUDFLARE_EMAIL
     
     # Clear bash history of this session
     history -c

@@ -290,8 +290,7 @@ secrets/
 *.secrets
 
 # Monitoring
-prometheus_data/
-grafana_data/
+
 
 # Docker volumes
 volumes/

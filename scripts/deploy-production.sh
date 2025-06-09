@@ -9,8 +9,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 LOG_FILE="/var/log/unityai-deploy.log"
 BACKUP_DIR="/opt/unityai/backups"
-DOCKER_COMPOSE_FILE="$PROJECT_DIR/compose/docker-compose.prod.yml"
-ENV_FILE="$PROJECT_DIR/config/.env.production"
+DOCKER_COMPOSE_FILE="$PROJECT_DIR/docker-compose.prod.yml"
+ENV_FILE="$PROJECT_DIR/.env.production"
 MAX_ROLLBACK_ATTEMPTS=3
 
 # Colors for output
@@ -87,7 +87,7 @@ check_prerequisites() {
     
     # Check if required files exist
     local required_files=(
-        "$PROJECT_DIR/$DOCKER_COMPOSE_FILE"
+        "$DOCKER_COMPOSE_FILE"
         "$PROJECT_DIR/.env.production"
         "$PROJECT_DIR/traefik/traefik.yml"
         "$PROJECT_DIR/traefik/dynamic.yml"
@@ -113,9 +113,9 @@ create_backup() {
     mkdir -p "$backup_path"
     
     # Backup database
-    if docker-compose -f "$PROJECT_DIR/$DOCKER_COMPOSE_FILE" ps | grep -q unityai-db; then
+    if docker-compose -f "$DOCKER_COMPOSE_FILE" ps | grep -q unityai-db; then
         info "Backing up database..."
-        docker-compose -f "$PROJECT_DIR/$DOCKER_COMPOSE_FILE" exec -T db pg_dumpall -U postgres > "$backup_path/database_backup.sql"
+        docker-compose -f "$DOCKER_COMPOSE_FILE" exec -T db pg_dumpall -U postgres > "$backup_path/database_backup.sql"
     fi
     
     # Backup volumes
@@ -125,7 +125,7 @@ create_backup() {
     docker run --rm -v unityai_n8n-data:/data -v "$backup_path:/backup" alpine tar czf /backup/n8n_data.tar.gz -C /data .
     
     # Backup configuration
-    cp -r "$PROJECT_DIR/.env*" "$backup_path/" 2>/dev/null || true
+    cp -r "$PROJECT_DIR/.env"* "$backup_path/" 2>/dev/null || true
     cp -r "$PROJECT_DIR/traefik" "$backup_path/" 2>/dev/null || true
     
     echo "$backup_timestamp" > "$BACKUP_DIR/latest_backup"
@@ -182,7 +182,6 @@ deploy() {
         "UnityAI API:https://api.unit-y-ai.io/health"
         "n8n:https://n8n.unit-y-ai.io"
         "Traefik:https://traefik.unit-y-ai.io/ping"
-        "Grafana:https://grafana.unit-y-ai.io/api/health"
     )
     
     for check in "${health_checks[@]}"; do
@@ -254,7 +253,6 @@ main() {
                 info "Services are available at:"
                 info "  - API: https://api.unit-y-ai.io"
                 info "  - n8n: https://n8n.unit-y-ai.io"
-                info "  - Grafana: https://grafana.unit-y-ai.io"
                 info "  - Traefik: https://traefik.unit-y-ai.io"
             else
                 error "Deployment failed, initiating rollback..."
@@ -277,22 +275,47 @@ main() {
             ;;
         "status")
             info "Checking service status..."
-            docker-compose -f "$PROJECT_DIR/$DOCKER_COMPOSE_FILE" ps
+            docker-compose -f "$DOCKER_COMPOSE_FILE" ps
             ;;
         "logs")
             local service=${2:-}
             if [[ -n "$service" ]]; then
-                docker-compose -f "$PROJECT_DIR/$DOCKER_COMPOSE_FILE" logs -f "$service"
+                docker-compose -f "$DOCKER_COMPOSE_FILE" logs -f "$service"
             else
-                docker-compose -f "$PROJECT_DIR/$DOCKER_COMPOSE_FILE" logs -f
+                docker-compose -f "$DOCKER_COMPOSE_FILE" logs -f
             fi
             ;;
         "backup")
             check_prerequisites
             create_backup
             ;;
+        "health")
+            info "Performing health checks..."
+            local health_checks=(
+                "UnityAI API:https://api.unit-y-ai.io/health"
+                "n8n:https://n8n.unit-y-ai.io"
+                "Traefik:https://traefik.unit-y-ai.io/ping"
+            )
+            
+            for check in "${health_checks[@]}"; do
+                IFS=':' read -r service url <<< "$check"
+                health_check "$service" "$url" || true
+            done
+            ;;
+        "update")
+            local service=${2:-}
+            info "Updating services..."
+            cd "$PROJECT_DIR"
+            if [[ -n "$service" ]]; then
+                docker-compose -f "$DOCKER_COMPOSE_FILE" pull "$service"
+                docker-compose -f "$DOCKER_COMPOSE_FILE" up -d "$service"
+            else
+                docker-compose -f "$DOCKER_COMPOSE_FILE" pull
+                docker-compose -f "$DOCKER_COMPOSE_FILE" up -d
+            fi
+            ;;
         *)
-            echo "Usage: $0 {deploy|rollback [timestamp]|status|logs [service]|backup}"
+            echo "Usage: $0 {deploy|rollback [timestamp]|status|logs [service]|backup|health|update [service]}"
             exit 1
             ;;
     esac

@@ -28,7 +28,7 @@ The platform uses **Docker Swarm Secrets** for secure credential management:
 | `n8n_encryption_key` | n8n data encryption | n8n |
 | `openai_api_key` | OpenAI API access | FastAPI, n8n |
 | `cloudflare_token` | DNS management | Traefik |
-| `grafana_admin_password` | Monitoring access | Grafana |
+
 
 ### 2. Network Security
 
@@ -46,7 +46,7 @@ The platform uses **Docker Swarm Secrets** for secure credential management:
 networks:
   frontend:    # Public-facing services (Traefik)
   backend:     # Internal services (DB, Redis)
-  monitoring:  # Monitoring stack (Grafana, Prometheus)
+  monitoring:  # Monitoring stack
 ```
 
 #### Firewall Rules
@@ -149,17 +149,16 @@ All security events are logged and monitored:
 
 ### 2. Metrics Collection
 
-Prometheus collects security metrics:
+Security metrics collection:
 
-- **Failed login attempts**: `auth_failures_total`
-- **API rate limits**: `rate_limit_exceeded_total`
-- **Certificate expiry**: `ssl_cert_expiry_days`
-- **Service health**: `service_up`
-
-### 3. Alerting Rules
+- Authentication failures
+- Rate limiting violations
+- SSL certificate status
+- Service health status
+- Resource usage patterns
 
 ```yaml
-# Example Prometheus alerting rules
+# Example alerting rules
 groups:
   - name: security
     rules:
