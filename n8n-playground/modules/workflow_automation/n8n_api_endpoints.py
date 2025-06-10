@@ -385,7 +385,9 @@ async def get_workflow_stats(
 
 
 # Error handlers
-@n8n_router.exception_handler(HTTPException)
+# Note: Exception handlers should be added to the main FastAPI app, not the router
+# @app.exception_handler(HTTPException) should be used in main.py instead
+
 async def http_exception_handler(request, exc: HTTPException):
     """Handle HTTP exceptions with structured logging."""
     logger.warning(
@@ -404,7 +406,7 @@ async def http_exception_handler(request, exc: HTTPException):
     )
 
 
-@n8n_router.exception_handler(Exception)
+# @app.exception_handler(Exception) should be used in main.py instead
 async def general_exception_handler(request, exc: Exception):
     """Handle general exceptions with structured logging."""
     logger.error(

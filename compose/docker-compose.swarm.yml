@@ -14,6 +14,9 @@ secrets:
   runner_token:          { external: true }
   cloudflare_email:      { external: true }
   cloudflare_token:      { external: true }
+  openai_api_key:        { external: true }
+  anthropic_api_key:     { external: true }
+  groq_api_key:          { external: true }
 
 # ───────────────────────────────────────────────────────────
 # Networks
@@ -176,7 +179,7 @@ services:
 
   # ---------- n8n Core ----------
   n8n:
-    image: ghcr.io/Flissel/n8n:${IMAGE_TAG:-latest}
+    image: n8nio/n8n:${IMAGE_TAG:-latest}
     secrets:
       - pg_pw
       - n8n_admin_password
@@ -238,7 +241,7 @@ services:
 
   # ---------- External Runner ----------
   runner-launcher:
-    image: ghcr.io/Flissel/n8n:${IMAGE_TAG:-latest}
+    image: n8nio/n8n:${IMAGE_TAG:-latest}
     command: n8n runner
     secrets:
       - runner_token
@@ -275,8 +278,8 @@ services:
       - pg_pw
       - redis_pw
     environment:
-      DATABASE_URL: postgresql://n8n_user:$(cat /run/secrets/pg_pw)@db:5432/n8n
-      REDIS_URL: redis://default:$(cat /run/secrets/redis_pw)@redis:6379/0
+      DATABASE_URL: postgresql://n8n_user:$$(cat /run/secrets/pg_pw)@db:5432/n8n
+      REDIS_URL: redis://default:$$(cat /run/secrets/redis_pw)@redis:6379/0
       N8N_BASE_URL: http://n8n:5678
       PYTHON_WORKER_URL: http://python-worker:8001
       ENVIRONMENT: production
@@ -326,31 +329,32 @@ services:
 
   # ---------- Python Worker ----------
   python-worker:
-    image: ${DOCKER_REGISTRY:-}unityai-python:${IMAGE_TAG:-latest}
+    image: ${DOCKER_REGISTRY:-}unityai-python-worker:${IMAGE_TAG:-latest}
     secrets:
       - pg_pw
       - redis_pw
+      - openai_api_key
+      - anthropic_api_key
+      - groq_api_key
     environment:
-      DATABASE_URL: postgresql://n8n_user:$(cat /run/secrets/pg_pw)@db:5432/n8n
-      REDIS_URL: redis://default:$(cat /run/secrets/redis_pw)@redis:6379/0
-      N8N_WEBHOOK_URL: http://n8n:5678
-      FASTAPI_URL: http://app:8000
-      ENVIRONMENT: production
-      LOG_LEVEL: INFO
-      LOG_FORMAT: json
-      # Worker-spezifische Einstellungen
+      # Database
+      DATABASE_URL: postgresql://unityai_user:$$(cat /run/secrets/pg_pw)@db:5432/unityai
+      REDIS_URL: redis://default:$$(cat /run/secrets/redis_pw)@redis:6379/0
+      # API Keys
+      OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
+      ANTHROPIC_API_KEY_FILE: /run/secrets/anthropic_api_key
+      GROQ_API_KEY_FILE: /run/secrets/groq_api_key
+      # Worker Settings
       WORKER_CONCURRENCY: 4
-      WORKER_TIMEOUT: 300
+      WORKER_PREFETCH_MULTIPLIER: 1
+      WORKER_MAX_TASKS_PER_CHILD: 1000
+      # Logging
+      LOG_LEVEL: INFO
+      PYTHONUNBUFFERED: 1
     volumes:
-      - type: bind
-        source: /opt/unityai/data
-        target: /app/data
       - type: bind
         source: /opt/unityai/logs
         target: /app/logs
-      - type: bind
-        source: /opt/unityai/scripts
-        target: /app/scripts
     networks:
       - unityai-network
     deploy:
@@ -371,8 +375,119 @@ services:
           memory: 1G
           cpus: '0.5'
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      test: ["CMD", "python", "-c", "import celery; print('OK')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      - db
+      - redis
+
+  # ---------- Frontend ----------
+  frontend:
+    image: ${DOCKER_REGISTRY:-}unityai-frontend:${IMAGE_TAG:-latest}
+    environment:
+      - REACT_APP_API_URL=https://api.unit-y-ai.io
+      - REACT_APP_N8N_URL=https://n8n.unit-y-ai.io
+      - REACT_APP_PLAYGROUND_URL=https://playground.unit-y-ai.io
+    networks:
+      - unityai-network
+      - traefik-public
+    deploy:
+      mode: replicated
+      replicas: 2
+      placement:
+        constraints:
+          - node.labels.app == true
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.http.routers.frontend.rule=Host(`app.unit-y-ai.io`)"
+        - "traefik.http.routers.frontend.entrypoints=websecure"
+        - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+        - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ---------- n8n API Playground ----------
+  n8n-playground:
+    image: ${DOCKER_REGISTRY:-}unityai-n8n-playground:${IMAGE_TAG:-latest}
+    secrets:
+      - pg_pw
+      - redis_pw
+      - n8n_admin_password
+      - n8n_encryption_key
+    environment:
+      # Database
+      DATABASE_URL: postgresql://n8n_user:$$(cat /run/secrets/pg_pw)@db:5432/n8n
+      REDIS_URL: redis://default:$$(cat /run/secrets/redis_pw)@redis:6379/0
+      # n8n Integration
+      N8N_BASE_URL: http://n8n:5678
+      N8N_API_KEY_FILE: /run/secrets/n8n_admin_password
+      # FastAPI Integration
+      FASTAPI_BASE_URL: http://app:8000
+      # Production Settings
+      ENVIRONMENT: production
+      DEBUG: "false"
+      LOG_LEVEL: INFO
+      # Security
+      JWT_SECRET_KEY_FILE: /run/secrets/n8n_encryption_key
+      # Monitoring
+      PROMETHEUS_ENABLED: "true"
+      GRAFANA_ENABLED: "true"
+    volumes:
+      - type: bind
+        source: /opt/unityai/logs
+        target: /app/logs
+      - type: bind
+        source: /opt/unityai/data
+        target: /app/data
+    networks:
+      - unityai-network
+      - traefik-public
+    deploy:
+      mode: replicated
+      replicas: 2
+      placement:
+        constraints:
+          - node.labels.app == true
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.http.routers.playground.rule=Host(`playground.unit-y-ai.io`)"
+        - "traefik.http.routers.playground.entrypoints=websecure"
+        - "traefik.http.routers.playground.tls.certresolver=letsencrypt"
+        - "traefik.http.services.playground.loadbalancer.server.port=8080"
+        - "traefik.http.services.playground.loadbalancer.healthcheck.path=/health"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+    depends_on:
+      - db
+      - redis
+      - n8n

@@ -140,6 +140,144 @@ docker stack deploy -c compose/docker-compose.swarm.yml unityai
 docker stack services unityai
 ```
 
+## n8n-Playground Integration
+
+### Überblick
+
+Das n8n-Playground ist eine erweiterte API-Schnittstelle für n8n, die zusätzliche Funktionalitäten bietet:
+
+- **Workflow-Automatisierung**: Erweiterte API-Endpunkte für Workflow-Management
+- **FastAPI Integration**: Bidirektionale Kommunikation zwischen n8n und FastAPI
+- **Monitoring**: Detaillierte Überwachung von Workflow-Ausführungen
+- **User Management**: Erweiterte Benutzerverwaltung und Authentifizierung
+
+### Service-Konfiguration
+
+Fügen Sie den n8n-playground Service zur `docker-compose.swarm.yml` hinzu:
+
+```yaml
+  # ---------- n8n API Playground ----------
+  n8n-playground:
+    image: ${DOCKER_REGISTRY:-}unityai-n8n-playground:${IMAGE_TAG:-latest}
+    secrets:
+      - pg_pw
+      - redis_pw
+      - n8n_admin_password
+    environment:
+      # Datenbank
+      DATABASE_URL: postgresql://n8n_user:$$(cat /run/secrets/pg_pw)@db:5432/n8n
+      REDIS_URL: redis://default:$$(cat /run/secrets/redis_pw)@redis:6379/0
+      # n8n Integration
+      N8N_BASE_URL: http://n8n:5678
+      N8N_API_KEY_FILE: /run/secrets/n8n_admin_password
+      # FastAPI Integration
+      FASTAPI_BASE_URL: http://app:8000
+      # Production Settings
+      ENVIRONMENT: production
+      DEBUG: "false"
+      LOG_LEVEL: INFO
+      # Security
+      JWT_SECRET_KEY_FILE: /run/secrets/n8n_encryption_key
+      # Monitoring
+      PROMETHEUS_ENABLED: "true"
+      GRAFANA_ENABLED: "true"
+    volumes:
+      - type: bind
+        source: /opt/unityai/logs
+        target: /app/logs
+      - type: bind
+        source: /opt/unityai/data
+        target: /app/data
+    networks:
+      - unityai-network
+      - traefik-public
+    deploy:
+      mode: replicated
+      replicas: 2
+      placement:
+        constraints:
+          - node.labels.app == true
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.http.routers.playground.rule=Host(`playground.unit-y-ai.io`)"
+        - "traefik.http.routers.playground.entrypoints=websecure"
+        - "traefik.http.routers.playground.tls.certresolver=letsencrypt"
+        - "traefik.http.services.playground.loadbalancer.server.port=8080"
+        - "traefik.http.services.playground.loadbalancer.healthcheck.path=/health"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - db
+      - redis
+      - n8n
+```
+
+### Frontend-Integration
+
+Aktualisieren Sie die Frontend-Umgebungsvariablen für die Playground-Integration:
+
+```yaml
+# In der app Service-Konfiguration
+environment:
+  # ... bestehende Variablen ...
+  REACT_APP_PLAYGROUND_API_URL: https://playground.unit-y-ai.io
+  REACT_APP_N8N_PLAYGROUND_ENABLED: "true"
+```
+
+### Zusätzliche Secrets
+
+Erstellen Sie zusätzliche Secrets für die Playground-Integration:
+
+```bash
+# n8n API Key (falls separater Key benötigt)
+echo "$N8N_PLAYGROUND_API_KEY" | docker secret create n8n_playground_api_key -
+
+# JWT Secret für Playground
+echo "$PLAYGROUND_JWT_SECRET" | docker secret create playground_jwt_secret -
+```
+
+### DNS-Konfiguration
+
+Fügen Sie den DNS-Eintrag für die Playground-Domain hinzu:
+
+```bash
+# Cloudflare DNS (Beispiel)
+playground.unit-y-ai.io -> <SWARM_MANAGER_IP>
+```
+
+### Deployment
+
+```bash
+# Stack mit Playground deployen
+docker stack deploy -c compose/docker-compose.swarm.yml unityai
+
+# Playground-Service überprüfen
+docker service ls | grep playground
+docker service logs unityai_n8n-playground
+```
+
+### Monitoring Integration
+
+Das n8n-Playground bietet erweiterte Monitoring-Funktionen:
+
+- **Prometheus Metriken**: `/metrics` Endpunkt
+- **Health Checks**: `/health` und `/health/detailed`
+- **API Dokumentation**: `/docs` (nur in Development)
+
 ## Service-Überwachung
 
 ### Status überprüfen
@@ -170,14 +308,17 @@ curl -f http://localhost:8001/health  # Python Worker
 ### Services skalieren
 
 ```bash
-# FastAPI skalieren
-docker service scale unityai_app=3
+# FastAPI Service skalieren
+docker service scale unityai_app=5
 
 # Python Worker skalieren
-docker service scale unityai_python-worker=5
+docker service scale unityai_python-worker=10
 
 # n8n Runner skalieren
 docker service scale unityai_runner-launcher=3
+
+# n8n Playground skalieren
+docker service scale unityai_n8n-playground=4
 ```
 
 ### Auto-Scaling
