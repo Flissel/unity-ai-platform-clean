@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List
 import traceback
 
-import aioredis
+import redis.asyncio as redis
 import structlog
 from .config import settings
 
@@ -30,7 +30,7 @@ class PythonWorkerService:
     """Main service class for Python worker operations."""
     
     def __init__(self):
-        self.redis_client: Optional[aioredis.Redis] = None
+        self.redis_client: Optional[redis.Redis] = None
         self.running_tasks: Dict[str, asyncio.Task] = {}
         self.task_results: Dict[str, Dict[str, Any]] = {}
         self._shutdown_event = asyncio.Event()
@@ -41,7 +41,7 @@ class PythonWorkerService:
         
         # Initialize Redis connection
         try:
-            self.redis_client = aioredis.from_url(
+            self.redis_client = redis.from_url(
                 settings.get_redis_url(),
                 encoding="utf-8",
                 decode_responses=True

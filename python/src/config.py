@@ -5,7 +5,8 @@ Configuration settings for UnityAI Python Worker Service.
 
 import os
 from typing import Optional
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
