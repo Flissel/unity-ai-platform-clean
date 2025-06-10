@@ -1,0 +1,93 @@
+# Image Processing Dependencies
+# Core image processing libraries
+Pillow>=10.0.0
+opencv-python>=4.8.0
+numpy>=1.24.0
+scipy>=1.11.0
+
+# OCR and text extraction
+pytesseract>=0.3.10
+easyocr>=1.7.0
+
+# Advanced image processing
+scikit-image>=0.21.0
+ImageIO>=2.31.0
+mahotas>=1.4.13
+
+# Computer vision and ML
+ultralytics>=8.0.0  # YOLO for object detection
+torch>=2.0.0
+torchvision>=0.15.0
+tensorflow>=2.13.0
+
+# Background removal
+rembg>=2.0.50
+backgroundremover>=0.2.6
+
+# Color analysis and processing
+colorspacious>=1.1.2
+webcolors>=1.13
+colorthief>=0.2.1
+
+# Image metadata and EXIF
+exifread>=3.0.0
+piexif>=1.1.3
+
+# Image format support
+rawpy>=0.18.1  # RAW image support
+wand>=0.6.11   # ImageMagick binding
+pygments>=2.15.0
+
+# Performance and optimization
+numba>=0.57.0
+dask[array]>=2023.7.0
+joblib>=1.3.0
+
+# Utilities
+tqdm>=4.65.0
+click>=8.1.0
+requests>=2.31.0
+
+# Data handling
+pandas>=2.0.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.15.0
+
+# File handling
+aiofiles>=23.1.0
+filetype>=1.2.0
+python-magic>=0.4.27
+
+# Validation and schema
+pydantic>=2.0.0
+cerberus>=1.3.4
+jsonschema>=4.18.0
+
+# Logging and monitoring
+structlog>=23.1.0
+rich>=13.4.0
+
+# Async processing
+aiohttp>=3.8.0
+
+# Image enhancement and filters
+Pillow-SIMD>=9.0.0  # Faster Pillow alternative (optional)
+
+# Face detection and recognition (optional)
+face-recognition>=1.3.0
+dlib>=19.24.0
+
+# QR code and barcode processing
+qrcode[pil]>=7.4.2
+pyzbar>=0.1.9
+
+# Image similarity and hashing
+imagehash>=4.3.1
+
+# Video processing (for animated images)
+imageio-ffmpeg>=0.4.8
+
+# Scientific image analysis
+maplotlib>=3.7.0
+skimage>=0.0  # Alias for scikit-image

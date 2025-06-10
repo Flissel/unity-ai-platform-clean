@@ -88,8 +88,7 @@ Write-Host "📊 Setze Monitoring-Konfiguration..." -ForegroundColor Yellow
 $env:METRICS_ENABLED = "true"
 $env:METRICS_PORT = "9090"
 $env:HEALTH_CHECK_ENABLED = "true"
-$env:PROMETHEUS_ENABLED = "false"
-$env:GRAFANA_ENABLED = "false"
+
 
 # Rate Limiting
 Write-Host "⚡ Setze Rate Limiting..." -ForegroundColor Yellow

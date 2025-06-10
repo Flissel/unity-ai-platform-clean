@@ -52,12 +52,11 @@ services:
     image: redis:7-alpine
     secrets: [redis_pw]
     command: >
-      redis-server --requirepass $(cat /run/secrets/redis_pw)
-                   --appendonly yes
+      sh -c 'redis-server --requirepass "$$(cat /run/secrets/redis_pw)" --appendonly yes'
     volumes:
       - redis-data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "$(cat /run/secrets/redis_pw)", "ping"]
+      test: ["CMD", "sh", "-c", "redis-cli -a \"$$(cat /run/secrets/redis_pw)\" ping"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -118,9 +117,10 @@ services:
       - ../.env.fastapi
       - ../.env.security
     environment:
-      DATABASE_URL: postgresql://n8n_user:$(cat /run/secrets/pg_pw)@db:5432/n8n
-      REDIS_URL:    redis://default:$(cat /run/secrets/redis_pw)@redis:6379/0
+      DATABASE_URL_FILE: /run/secrets/pg_pw
+      REDIS_PASSWORD_FILE: /run/secrets/redis_pw
       N8N_BASE_URL: http://n8n:5678
+      PYTHON_WORKER_URL: http://python-worker:8001
       ENVIRONMENT:  production
     volumes:
       - ../logs:/app/logs
@@ -132,4 +132,35 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  # ---------- Python Worker ----------
+  python-worker:
+    image: ${DOCKER_REGISTRY:-}unityai-python:${IMAGE_TAG:-latest}
+    build:
+      context: ../python
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DATABASE_URL_FILE=/run/secrets/pg_pw
+      - REDIS_PASSWORD_FILE=/run/secrets/redis_pw
+      - N8N_WEBHOOK_URL=http://n8n:5678
+      - FASTAPI_URL=http://app:8000
+      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+      - LOG_FORMAT=json
+    volumes:
+      - ../data:/app/data
+      - ../logs:/app/logs
+      - ../python/scripts:/app/scripts
+    networks:
+      - unityai-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 

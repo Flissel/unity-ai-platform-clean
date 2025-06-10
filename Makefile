@@ -69,8 +69,7 @@ up:
 	@echo "Services started. Access:"
 	@echo "  - UnityAI API: http://localhost:8000"
 	@echo "  - n8n: http://localhost:5678"
-	@echo "  - Grafana: http://localhost:3000"
-	@echo "  - Prometheus: http://localhost:9090"
+	
 
 up-dev:
 	BUILD_TARGET=development docker-compose up -d
