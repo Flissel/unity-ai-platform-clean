@@ -1,0 +1,321 @@
+root@ubuntu-2gb-nbg1-1:~# cd unity-ai-platform-clean/
+root@ubuntu-2gb-nbg1-1:~/unity-ai-platform-clean# # Build the main app image
+docker build -t unityai-app:latest .
+
+# Build the frontend image
+docker build -t unityai-frontend:latest ./frontend/
+
+# Build the python worker image (same as main app)
+docker build -t unityai-python-worker:latest .
+
+# Build the n8n-playground image (you may need to create Dockerfile.prod first)
+docker build -f ./n8n-playground/Dockerfile.dev -t unityai-n8n-playground:latest ./n8n-playground/
+[+] Building 5.6s (12/21)                                      docker:default
+ => [internal] load build definition from Dockerfile                     0.0s
+ => => transferring dockerfile: 3.08kB                                   0.0s 
+ => WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (  0.0s 
+ => WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (  0.0s 
+ => WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (  0.0s 
+ => WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (  0.0s 
+ => [internal] load metadata for docker.io/library/python:3.11-slim      0.8s 
+ => [internal] load .dockerignore                                        0.0s
+ => => transferring context: 2B                                          0.0s 
+ => [builder 1/5] FROM docker.io/library/python:3.11-slim@sha256:7a3ed1  0.0s 
+ => [internal] load build context                                        0.0s 
+ => => transferring context: 72B                                         0.0s 
+ => CACHED [production 2/8] RUN groupadd -r unityai && useradd -r -g un  0.0s 
+ => CACHED [production 3/8] RUN apt-get update && apt-get install -y     0.0s 
+ => CACHED [production 4/8] WORKDIR /app                                 0.0s
+ => CACHED [builder 2/5] RUN apt-get update && apt-get install -y     b  0.0s 
+ => CACHED [builder 3/5] WORKDIR /app                                    0.0s 
+ => CACHED [builder 4/5] COPY pyproject.toml requirements.txt* ./        0.0s 
+ => ERROR [builder 5/5] RUN pip install --no-cache-dir -r requirements.  4.8s 
+------
+ > [builder 5/5] RUN pip install --no-cache-dir -r requirements.txt ||     pip install --no-cache-dir -e .:
+2.004 Collecting fastapi==0.104.1 (from -r requirements.txt (line 2))
+2.056   Downloading fastapi-0.104.1-py3-none-any.whl.metadata (24 kB)
+2.094 Collecting uvicorn==0.24.0 (from uvicorn[standard]==0.24.0->-r requirements.txt (line 3))
+2.100   Downloading uvicorn-0.24.0-py3-none-any.whl.metadata (6.4 kB)
+2.123 Collecting gunicorn==21.2.0 (from -r requirements.txt (line 4))
+2.129   Downloading gunicorn-21.2.0-py3-none-any.whl.metadata (4.1 kB)        
+2.266 Collecting pydantic==2.5.0 (from -r requirements.txt (line 5))
+2.272   Downloading pydantic-2.5.0-py3-none-any.whl.metadata (174 kB)
+2.283      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 174.6/174.6 kB 20.6 MB/s eta 0:00:00
+2.311 Collecting pydantic-settings==2.1.0 (from -r requirements.txt (line 6)) 
+2.317   Downloading pydantic_settings-2.1.0-py3-none-any.whl.metadata (2.9 kB)
+2.643 Collecting sqlalchemy==2.0.23 (from -r requirements.txt (line 9))       
+2.649   Downloading SQLAlchemy-2.0.23-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.6 kB)
+2.688 Collecting alembic==1.13.1 (from -r requirements.txt (line 10))
+2.693   Downloading alembic-1.13.1-py3-none-any.whl.metadata (7.4 kB)
+2.762 Collecting psycopg2-binary==2.9.9 (from -r requirements.txt (line 11))  
+2.768   Downloading psycopg2_binary-2.9.9-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.4 kB)
+2.785 Collecting aiosqlite==0.19.0 (from -r requirements.txt (line 12))       
+2.791   Downloading aiosqlite-0.19.0-py3-none-any.whl.metadata (4.3 kB)       
+2.836 Collecting redis==5.0.1 (from -r requirements.txt (line 15))
+2.842   Downloading redis-5.0.1-py3-none-any.whl.metadata (8.9 kB)
+2.862 Collecting aioredis==2.0.1 (from -r requirements.txt (line 16))
+2.869   Downloading aioredis-2.0.1-py3-none-any.whl.metadata (15 kB)
+2.897 Collecting httpx==0.25.2 (from -r requirements.txt (line 19))
+2.904   Downloading httpx-0.25.2-py3-none-any.whl.metadata (6.9 kB)
+3.442 Collecting aiohttp==3.9.1 (from -r requirements.txt (line 20))
+3.447   Downloading aiohttp-3.9.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.4 kB)
+3.481 Collecting requests==2.31.0 (from -r requirements.txt (line 21))        
+3.487   Downloading requests-2.31.0-py3-none-any.whl.metadata (4.6 kB)        
+3.503 Collecting passlib==1.7.4 (from passlib[bcrypt]==1.7.4->-r requirements.txt (line 24))
+3.509   Downloading passlib-1.7.4-py2.py3-none-any.whl.metadata (1.7 kB)      
+3.525 Collecting python-jose==3.3.0 (from python-jose[cryptography]==3.3.0->-r requirements.txt (line 25))
+3.531   Downloading python_jose-3.3.0-py2.py3-none-any.whl.metadata (5.4 kB)  
+3.547 Collecting python-multipart==0.0.6 (from -r requirements.txt (line 26)) 
+3.553   Downloading python_multipart-0.0.6-py3-none-any.whl.metadata (2.5 kB) 
+3.801 Collecting cryptography==42.0.8 (from -r requirements.txt (line 27))    
+3.807   Downloading cryptography-42.0.8-cp39-abi3-manylinux_2_28_x86_64.whl.metadata (5.3 kB)
+3.832 ERROR: Ignored the following yanked versions: 0.4.0.dev10, 0.4.0.dev11, 0.4.0.dev12, 0.4.0.dev13, 0.4.0, 0.4.1
+3.832 ERROR: Could not find a version that satisfies the requirement autogen-core==0.2.0 (from versions: 0.0.2, 0.4.0.dev0, 0.4.0.dev1, 0.4.0.dev2, 0.4.0.dev3, 0.4.0.dev4, 0.4.0.dev5, 0.4.0.dev6, 0.4.0.dev7, 0.4.0.dev8, 0.4.0.dev9, 0.4.2, 0.4.3, 0.4.4, 0.4.5, 0.4.6, 0.4.7, 0.4.8, 0.4.8.1, 0.4.8.2, 0.4.9, 0.4.9.1, 0.4.9.2, 0.4.9.3, 0.5.0, 0.5.1, 0.5.2, 0.5.3, 0.5.4, 0.5.5, 0.5.6, 0.5.7, 0.6.0, 0.6.1)
+3.833 ERROR: No matching distribution found for autogen-core==0.2.0
+3.926
+3.926 [notice] A new release of pip is available: 24.0 -> 25.1.1
+3.926 [notice] To update, run: pip install --upgrade pip
+4.581 Obtaining file:///app
+4.586 ERROR: Exception:
+4.586 Traceback (most recent call last):
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/cli/base_command.py", line 180, in exc_logging_wrapper
+4.586     status = run_func(*args)
+4.586              ^^^^^^^^^^^^^^^
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/cli/req_command.py", line 245, in wrapper
+4.586     return func(self, options, args)
+4.586            ^^^^^^^^^^^^^^^^^^^^^^^^^
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/commands/install.py", line 377, in run
+4.586     requirement_set = resolver.resolve(
+4.586                       ^^^^^^^^^^^^^^^^^
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/resolver.py", line 76, in resolve
+4.586     collected = self.factory.collect_root_requirements(root_reqs)       
+4.586                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/factory.py", line 534, in collect_root_requirements
+4.586     reqs = list(
+4.586            ^^^^^
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/factory.py", line 490, in _make_requirements_from_install_req     
+4.586     cand = self._make_base_candidate_from_link(
+4.586            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/factory.py", line 207, in _make_base_candidate_from_link
+4.586     self._editable_candidate_cache[link] = EditableCandidate(
+4.586                                            ^^^^^^^^^^^^^^^^^^
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/candidates.py", line 315, in __init__
+4.586     super().__init__(
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/candidates.py", line 156, in __init__
+4.586     self.dist = self._prepare()
+4.586                 ^^^^^^^^^^^^^^^
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/candidates.py", line 222, in _prepare
+4.586     dist = self._prepare_distribution()
+4.586            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/candidates.py", line 325, in _prepare_distribution
+4.586     return self._factory.preparer.prepare_editable_requirement(self._ireq)
+4.586            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/operations/prepare.py", line 696, in prepare_editable_requirement
+4.586     dist = _get_prepared_distribution(
+4.586            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/operations/prepare.py", line 71, in _get_prepared_distribution
+4.586     abstract_dist.prepare_distribution_metadata(
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/distributions/sdist.py", line 37, in prepare_distribution_metadata
+4.586     self.req.load_pyproject_toml()
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/req/req_install.py", line 516, in load_pyproject_toml
+4.586     pyproject_toml_data = load_pyproject_toml(
+4.586                           ^^^^^^^^^^^^^^^^^^^^
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_internal/pyproject.py", line 64, in load_pyproject_toml
+4.586     pp_toml = tomli.loads(f.read())
+4.586               ^^^^^^^^^^^^^^^^^^^^^
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_vendor/tomli/_parser.py", line 102, in loads
+4.586     pos = key_value_rule(src, pos, out, header, parse_float)
+4.586           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_vendor/tomli/_parser.py", line 326, in key_value_rule
+4.586     pos, key, value = parse_key_value_pair(src, pos, parse_float)       
+4.586                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_vendor/tomli/_parser.py", line 369, in parse_key_value_pair
+4.586     pos, value = parse_value(src, pos, parse_float)
+4.586                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_vendor/tomli/_parser.py", line 616, in parse_value
+4.586     return parse_array(src, pos, parse_float)
+4.586            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.586   File "/usr/local/lib/python3.11/site-packages/pip/_vendor/tomli/_parser.py", line 428, in parse_array
+4.586     raise suffixed_err(src, pos, "Unclosed array")
+4.586 pip._vendor.tomli.TOMLDecodeError: Unclosed array (at line 197, column 52)
+4.680
+4.680 [notice] A new release of pip is available: 24.0 -> 25.1.1
+4.680 [notice] To update, run: pip install --upgrade pip
+------
+Dockerfile:27
+--------------------
+  26 |     # Install dependencies using pip
+  27 | >>> RUN pip install --no-cache-dir -r requirements.txt || \
+  28 | >>>     pip install --no-cache-dir -e .
+  29 |
+--------------------
+ERROR: failed to solve: process "/bin/sh -c pip install --no-cache-dir -r requirements.txt ||     pip install --no-cache-dir -e ." did not complete successfully: exit code: 2
+[+] Building 3.2s (13/21)                                      docker:default
+ => [internal] load build definition from Dockerfile                     0.0s
+ => => transferring dockerfile: 1.14kB                                   0.0s
+ => WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (  0.0s 
+ => [internal] load metadata for docker.io/library/nginx:alpine          0.8s 
+ => [internal] load metadata for docker.io/library/node:18-alpine        0.8s 
+ => [internal] load .dockerignore                                        0.0s
+ => => transferring context: 2B                                          0.0s 
+ => [builder 1/6] FROM docker.io/library/node:18-alpine@sha256:8d6421d6  0.0s 
+ => [stage-1  1/10] FROM docker.io/library/nginx:alpine@sha256:65645c7b  0.0s 
+ => [internal] load build context                                        0.0s 
+ => => transferring context: 1.05kB                                      0.0s 
+ => CACHED [builder 2/6] WORKDIR /app                                    0.0s 
+ => CACHED [builder 3/6] COPY package*.json ./                           0.0s 
+ => CACHED [builder 4/6] RUN npm ci --only=production                    0.0s 
+ => CACHED [builder 5/6] COPY . .                                        0.0s
+ => CACHED [stage-1  2/10] COPY nginx.conf /etc/nginx/nginx.conf         0.0s 
+ => ERROR [builder 6/6] RUN npm run build                                2.3s
+------
+ > [builder 6/6] RUN npm run build:
+0.321
+0.321 > unityai-frontend@1.0.0 build
+0.321 > react-scripts build
+0.321
+2.255 Could not find a required file.
+2.256   Name: index.html
+2.256   Searched in: /app/public
+------
+
+ 1 warning found (use docker --debug to expand):
+ - FromAsCasing: 'as' and 'FROM' keywords' casing do not match (line 2)       
+Dockerfile:17
+--------------------
+  15 |
+  16 |     # Build the application
+  17 | >>> RUN npm run build
+  18 |
+  19 |     # Production stage
+--------------------
+ERROR: failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+[+] Building 5.0s (12/21)                                      docker:default
+ => [internal] load build definition from Dockerfile                     0.0s
+ => => transferring dockerfile: 3.08kB                                   0.0s 
+ => WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (  0.0s
+ => WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (  0.0s 
+ => WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (  0.0s 
+ => WARN: FromAsCasing: 'as' and 'FROM' keywords' casing do not match (  0.0s 
+ => [internal] load metadata for docker.io/library/python:3.11-slim      0.2s 
+ => [internal] load .dockerignore                                        0.0s
+ => => transferring context: 2B                                          0.0s 
+ => [builder 1/5] FROM docker.io/library/python:3.11-slim@sha256:7a3ed1  0.0s 
+ => [internal] load build context                                        0.0s 
+ => => transferring context: 72B                                         0.0s 
+ => CACHED [production 2/8] RUN groupadd -r unityai && useradd -r -g un  0.0s 
+ => CACHED [production 3/8] RUN apt-get update && apt-get install -y     0.0s 
+ => CACHED [production 4/8] WORKDIR /app                                 0.0s
+ => CACHED [builder 2/5] RUN apt-get update && apt-get install -y     b  0.0s 
+ => CACHED [builder 3/5] WORKDIR /app                                    0.0s 
+ => CACHED [builder 4/5] COPY pyproject.toml requirements.txt* ./        0.0s 
+ => ERROR [builder 5/5] RUN pip install --no-cache-dir -r requirements.  4.8s 
+------
+ > [builder 5/5] RUN pip install --no-cache-dir -r requirements.txt ||     pip install --no-cache-dir -e .:
+2.042 Collecting fastapi==0.104.1 (from -r requirements.txt (line 2))
+2.081   Downloading fastapi-0.104.1-py3-none-any.whl.metadata (24 kB)
+2.127 Collecting uvicorn==0.24.0 (from uvicorn[standard]==0.24.0->-r requirements.txt (line 3))
+2.132   Downloading uvicorn-0.24.0-py3-none-any.whl.metadata (6.4 kB)
+2.156 Collecting gunicorn==21.2.0 (from -r requirements.txt (line 4))
+2.161   Downloading gunicorn-21.2.0-py3-none-any.whl.metadata (4.1 kB)        
+2.303 Collecting pydantic==2.5.0 (from -r requirements.txt (line 5))
+2.310   Downloading pydantic-2.5.0-py3-none-any.whl.metadata (174 kB)
+2.320      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 174.6/174.6 kB 22.8 MB/s eta 0:00:00
+2.348 Collecting pydantic-settings==2.1.0 (from -r requirements.txt (line 6)) 
+2.354   Downloading pydantic_settings-2.1.0-py3-none-any.whl.metadata (2.9 kB)
+2.686 Collecting sqlalchemy==2.0.23 (from -r requirements.txt (line 9))       
+2.692   Downloading SQLAlchemy-2.0.23-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (9.6 kB)
+2.731 Collecting alembic==1.13.1 (from -r requirements.txt (line 10))
+2.736   Downloading alembic-1.13.1-py3-none-any.whl.metadata (7.4 kB)
+2.806 Collecting psycopg2-binary==2.9.9 (from -r requirements.txt (line 11))  
+2.811   Downloading psycopg2_binary-2.9.9-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.4 kB)
+2.829 Collecting aiosqlite==0.19.0 (from -r requirements.txt (line 12))       
+2.834   Downloading aiosqlite-0.19.0-py3-none-any.whl.metadata (4.3 kB)       
+2.879 Collecting redis==5.0.1 (from -r requirements.txt (line 15))
+2.884   Downloading redis-5.0.1-py3-none-any.whl.metadata (8.9 kB)
+2.902 Collecting aioredis==2.0.1 (from -r requirements.txt (line 16))
+2.907   Downloading aioredis-2.0.1-py3-none-any.whl.metadata (15 kB)
+2.937 Collecting httpx==0.25.2 (from -r requirements.txt (line 19))
+2.943   Downloading httpx-0.25.2-py3-none-any.whl.metadata (6.9 kB)
+3.480 Collecting aiohttp==3.9.1 (from -r requirements.txt (line 20))
+3.486   Downloading aiohttp-3.9.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.4 kB)
+3.519 Collecting requests==2.31.0 (from -r requirements.txt (line 21))        
+3.523   Downloading requests-2.31.0-py3-none-any.whl.metadata (4.6 kB)        
+3.538 Collecting passlib==1.7.4 (from passlib[bcrypt]==1.7.4->-r requirements.txt (line 24))
+3.543   Downloading passlib-1.7.4-py2.py3-none-any.whl.metadata (1.7 kB)      
+3.559 Collecting python-jose==3.3.0 (from python-jose[cryptography]==3.3.0->-r requirements.txt (line 25))
+3.565   Downloading python_jose-3.3.0-py2.py3-none-any.whl.metadata (5.4 kB)  
+3.583 Collecting python-multipart==0.0.6 (from -r requirements.txt (line 26)) 
+3.588   Downloading python_multipart-0.0.6-py3-none-any.whl.metadata (2.5 kB) 
+3.831 Collecting cryptography==42.0.8 (from -r requirements.txt (line 27))    
+3.837   Downloading cryptography-42.0.8-cp39-abi3-manylinux_2_28_x86_64.whl.metadata (5.3 kB)
+3.862 ERROR: Ignored the following yanked versions: 0.4.0.dev10, 0.4.0.dev11, 0.4.0.dev12, 0.4.0.dev13, 0.4.0, 0.4.1
+3.862 ERROR: Could not find a version that satisfies the requirement autogen-core==0.2.0 (from versions: 0.0.2, 0.4.0.dev0, 0.4.0.dev1, 0.4.0.dev2, 0.4.0.dev3, 0.4.0.dev4, 0.4.0.dev5, 0.4.0.dev6, 0.4.0.dev7, 0.4.0.dev8, 0.4.0.dev9, 0.4.2, 0.4.3, 0.4.4, 0.4.5, 0.4.6, 0.4.7, 0.4.8, 0.4.8.1, 0.4.8.2, 0.4.9, 0.4.9.1, 0.4.9.2, 0.4.9.3, 0.5.0, 0.5.1, 0.5.2, 0.5.3, 0.5.4, 0.5.5, 0.5.6, 0.5.7, 0.6.0, 0.6.1)
+3.863 ERROR: No matching distribution found for autogen-core==0.2.0
+3.958
+3.958 [notice] A new release of pip is available: 24.0 -> 25.1.1
+3.958 [notice] To update, run: pip install --upgrade pip
+4.567 Obtaining file:///app
+4.571 ERROR: Exception:
+4.571 Traceback (most recent call last):
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/cli/base_command.py", line 180, in exc_logging_wrapper
+4.571     status = run_func(*args)
+4.571              ^^^^^^^^^^^^^^^
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/cli/req_command.py", line 245, in wrapper
+4.571     return func(self, options, args)
+4.571            ^^^^^^^^^^^^^^^^^^^^^^^^^
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/commands/install.py", line 377, in run
+4.571     requirement_set = resolver.resolve(
+4.571                       ^^^^^^^^^^^^^^^^^
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/resolver.py", line 76, in resolve
+4.571     collected = self.factory.collect_root_requirements(root_reqs)       
+4.571                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/factory.py", line 534, in collect_root_requirements
+4.571     reqs = list(
+4.571            ^^^^^
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/factory.py", line 490, in _make_requirements_from_install_req     
+4.571     cand = self._make_base_candidate_from_link(
+4.571            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/factory.py", line 207, in _make_base_candidate_from_link
+4.571     self._editable_candidate_cache[link] = EditableCandidate(
+4.571                                            ^^^^^^^^^^^^^^^^^^
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/candidates.py", line 315, in __init__
+4.571     super().__init__(
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/candidates.py", line 156, in __init__
+4.571     self.dist = self._prepare()
+4.571                 ^^^^^^^^^^^^^^^
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/candidates.py", line 222, in _prepare
+4.571     dist = self._prepare_distribution()
+4.571            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/resolution/resolvelib/candidates.py", line 325, in _prepare_distribution
+4.571     return self._factory.preparer.prepare_editable_requirement(self._ireq)
+4.571            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/operations/prepare.py", line 696, in prepare_editable_requirement
+4.571     dist = _get_prepared_distribution(
+4.571            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/operations/prepare.py", line 71, in _get_prepared_distribution
+4.571     abstract_dist.prepare_distribution_metadata(
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/distributions/sdist.py", line 37, in prepare_distribution_metadata
+4.571     self.req.load_pyproject_toml()
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/req/req_install.py", line 516, in load_pyproject_toml
+4.571     pyproject_toml_data = load_pyproject_toml(
+4.571                           ^^^^^^^^^^^^^^^^^^^^
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_internal/pyproject.py", line 64, in load_pyproject_toml
+4.571     pp_toml = tomli.loads(f.read())
+4.571               ^^^^^^^^^^^^^^^^^^^^^
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_vendor/tomli/_parser.py", line 102, in loads
+4.571     pos = key_value_rule(src, pos, out, header, parse_float)
+4.571           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_vendor/tomli/_parser.py", line 326, in key_value_rule
+4.571     pos, key, value = parse_key_value_pair(src, pos, parse_float)       
+4.571                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_vendor/tomli/_parser.py", line 369, in parse_key_value_pair
+4.571     pos, value = parse_value(src, pos, parse_float)
+4.571                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_vendor/tomli/_parser.py", line 616, in parse_value
+4.571     return parse_array(src, pos, parse_float)
+4.571            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+4.571   File "/usr/local/lib/python3.11/site-packages/pip/_vendor/tomli/_parser.py", line 428, in parse_array
+4.571     raise suffixed_err(src, pos, "Unclosed array")
+4.571 pip._vendor.tomli.TOMLDecodeError: Unclosed array (at line 197, column 52)
+4.667
