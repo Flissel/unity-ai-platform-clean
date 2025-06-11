@@ -432,6 +432,9 @@ services:
       - redis_pw
       - n8n_admin_password
       - n8n_encryption_key
+      - n8n_api_key
+      - secret_key
+      
     environment:
       # Database
       DATABASE_URL: postgresql://n8n_user:$$(cat /run/secrets/pg_pw)@db:5432/n8n
@@ -443,10 +446,11 @@ services:
       FASTAPI_BASE_URL: http://app:8000
       # Production Settings
       ENVIRONMENT: production
-      DEBUG: "false"
+      DEBUG: "true"
       LOG_LEVEL: INFO
       # Security
       JWT_SECRET_KEY_FILE: /run/secrets/n8n_encryption_key
+      SECRET_KEY_FILE: /run/secrets/secret_key
       # Monitoring
       PROMETHEUS_ENABLED: "true"
       GRAFANA_ENABLED: "true"
