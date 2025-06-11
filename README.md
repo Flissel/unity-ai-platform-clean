@@ -4,7 +4,41 @@ A comprehensive automation platform combining FastAPI, n8n workflows, and monito
 
 ## 🚀 Quick Start
 
-### One-Click Production Deployment (Recommended)
+### Prerequisites
+- Docker Engine 20.10+ with Swarm mode
+- Domain name with DNS management
+- Cloudflare account for SSL certificates
+- API keys for external services
+
+### Production Deployment (Docker Swarm - Recommended)
+```bash
+# Clone the repository
+git clone <repository-url>
+cd unityai
+
+# Initialize Docker Swarm (if not already done)
+docker swarm init
+
+# Create secrets for sensitive data
+chmod +x create-secrets.sh
+./create-secrets.sh
+
+# Deploy the stack
+chmod +x deploy-swarm.sh
+./deploy-swarm.sh
+```
+
+**📖 For detailed Swarm deployment instructions, see [README-SWARM.md](README-SWARM.md)**
+
+### Development Setup
+```bash
+# For local development only
+cp config/.env.template config/.env.local
+nano config/.env.local
+docker-compose up -d
+```
+
+### One-Click Production Deployment (Alternative)
 
 The fastest way to get UnityAI running in production:
 
@@ -34,25 +68,6 @@ This script will:
 **Perfect for:** Customer installations, demo environments, commercial sales, production environments.
 
 📖 **Detailed guides:** See `ONE-CLICK-SETUP.md` and `TEMPLATE-CONFIG-GUIDE.md`
-
-### Development Environment
-
-```bash
-# Clone the repository
-git clone https://github.com/Flissel/unityai.git
-cd unityai
-
-# Copy environment template
-cp .env.example .env
-
-# Start development environment
-docker-compose up -d
-
-# Access services
-# - FastAPI: http://localhost:8000
-# - n8n: http://localhost:5678
-
-```
 
 ### Advanced Production Deployment
 
