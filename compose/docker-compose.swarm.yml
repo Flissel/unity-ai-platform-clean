@@ -38,6 +38,8 @@ volumes:
   redis-data:
   n8n-data:
   traefik-acme:
+  app-logs:
+  app-uploads:
 
 # ───────────────────────────────────────────────────────────
 # Services
@@ -93,10 +95,9 @@ services:
     command:
       - --api.dashboard=true
       - --api.insecure=false
-      - --providers.docker=true
-      - --providers.docker.swarmMode=true
-      - --providers.docker.exposedbydefault=false
-      - --providers.docker.network=traefik-public
+      - --providers.swarm=true
+      - --providers.swarm.exposedbydefault=false
+      - --providers.swarm.network=traefik-public
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
       - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
@@ -283,17 +284,18 @@ services:
       N8N_BASE_URL: http://n8n:5678
       PYTHON_WORKER_URL: http://python-worker:8001
       ENVIRONMENT: production
+      SECRET_KEY: ${SECRET_KEY:-unityai-production-secret-key-12345}
+      N8N_API_KEY: ${N8N_API_KEY:-placeholder-api-key}
+      N8N_USERNAME: admin
+      N8N_PASSWORD: admin123
+      N8N_API_BASE_URL: http://n8n:5678
       # Swarm-spezifische Einstellungen
       HOST: 0.0.0.0
       PORT: 8000
       WORKERS: 2
     volumes:
-      - type: bind
-        source: /opt/unityai/logs
-        target: /app/logs
-      - type: bind
-        source: /opt/unityai/uploads
-        target: /app/uploads
+      - app-logs:/app/logs
+      - app-uploads:/app/uploads
     networks:
       - unityai-network
       - traefik-public
