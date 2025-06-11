@@ -18,6 +18,7 @@ secrets:
   anthropic_api_key:     { external: true }
   groq_api_key:          { external: true }
   n8n_api_key:           { external: true }
+  secret_key:            { external: true }
 # ───────────────────────────────────────────────────────────
 # Networks
 # ───────────────────────────────────────────────────────────
