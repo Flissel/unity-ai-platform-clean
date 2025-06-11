@@ -4,6 +4,37 @@ A comprehensive automation platform combining FastAPI, n8n workflows, and monito
 
 ## 🚀 Quick Start
 
+### One-Click Production Deployment (Recommended)
+
+The fastest way to get UnityAI running in production:
+
+```powershell
+# Clone and navigate to the repository
+git clone <repository-url>
+cd unityai
+
+# Option 1: Template-based configuration (faster for experienced users)
+copy config\production-config-template.env config\production-config.env
+# Edit config/production-config.env with your values, then:
+.\scripts\one-click-production.ps1
+
+# Option 2: Interactive configuration
+.\scripts\one-click-production.ps1
+# Follow the interactive prompts
+```
+
+This script will:
+- Check Docker status
+- Load configuration (template or interactive)
+- Build all Docker images
+- Clean up old deployments
+- Deploy the complete production stack
+- Display access URLs and management commands
+
+**Perfect for:** Customer installations, demo environments, commercial sales, production environments.
+
+📖 **Detailed guides:** See `ONE-CLICK-SETUP.md` and `TEMPLATE-CONFIG-GUIDE.md`
+
 ### Development Environment
 
 ```bash
@@ -23,7 +54,7 @@ docker-compose up -d
 
 ```
 
-### Production Deployment
+### Advanced Production Deployment
 
 #### Standard Docker Compose
 ```bash
