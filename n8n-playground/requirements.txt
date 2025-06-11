@@ -23,6 +23,7 @@ email-validator==2.1.0
 aiohttp==3.9.1
 httpx==0.25.2
 requests==2.31.0
+aioresponses==0.7.4
 
 # Authentication and security
 pyjwt==2.8.0
