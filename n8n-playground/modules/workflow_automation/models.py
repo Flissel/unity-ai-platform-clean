@@ -463,3 +463,12 @@ class WorkflowStatsResponse(BaseModel):
     # Recent activity
     recent_executions: List[WorkflowExecution]
     top_workflows: List[Dict[str, Any]]
+
+
+class ExecutionResult(BaseModel):
+    """Execution result model for workflow executions."""
+    success: bool
+    execution_id: str
+    output_data: Optional[Dict[str, Any]] = None
+    duration: Optional[timedelta] = None
+    error_message: Optional[str] = None
