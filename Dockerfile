@@ -91,15 +91,9 @@ RUN apt-get update && apt-get install -y \
     htop \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry for development
-RUN pip install poetry==1.6.1
-
-# Copy poetry files
-COPY pyproject.toml poetry.lock* ./
-
-# Install all dependencies including dev
-RUN poetry config virtualenvs.create false \
-    && poetry install
+# Install development dependencies
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
 
 # Switch back to unityai user
