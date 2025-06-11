@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  traefik:
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.myresolver.acme.tlschallenge=true
+      - --certificatesresolvers.myresolver.acme.email=${ACME_EMAIL:-admin@example.com}
+      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.api.rule=Host(`traefik.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.api.service=api@internal"
+      - "traefik.http.routers.unityai.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.unityai.entrypoints=web"
+      - "traefik.http.routers.unityai.service=unityai"
+      - "traefik.http.services.unityai.loadbalancer.server.port=3000"
+
+  frontend:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.services.frontend.loadbalancer.server.port=3000"
+
+  app:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`api.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.app.entrypoints=web"
+      - "traefik.http.services.app.loadbalancer.server.port=8000"
+
+  n8n:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.n8n.rule=Host(`n8n.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.n8n.entrypoints=web"
+      - "traefik.http.services.n8n.loadbalancer.server.port=5678"
+
+  n8n-playground:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.n8n-playground.rule=Host(`playground.${DOMAIN:-localhost}`)"
+      - "traefik.http.routers.n8n-playground.entrypoints=web"
+      - "traefik.http.services.n8n-playground.loadbalancer.server.port=8001"

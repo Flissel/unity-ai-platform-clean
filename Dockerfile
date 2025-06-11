@@ -104,7 +104,7 @@ USER unityai
 # Development command with hot reload
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--log-level", "debug"]
 
-# Testing stage
+# Testing stage (for CI/CD only - not used in production)
 FROM development as testing
 
 # Switch to root for test setup
@@ -121,3 +121,8 @@ USER unityai
 
 # Run tests
 CMD ["python", "-m", "pytest", "-v", "--cov=src", "--cov-report=html", "--cov-report=term-missing"]
+
+# Production stage (final stage - this will be the default)
+FROM production as final
+
+# This ensures production is the default target when no --target is specified
