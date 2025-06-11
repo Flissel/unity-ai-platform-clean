@@ -15,7 +15,7 @@ from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
-from modules.workflow_automation.response_handler import (
+from core.response_handler import (
     ResponseHandler,
     ResponseHandlerConfig,
     ResponseFormatter,
