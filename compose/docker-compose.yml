@@ -109,7 +109,7 @@ services:
   # ---------- FastAPI App ----------
   app:
     build:
-      context: ../fastapi
+      context: ..
       dockerfile: Dockerfile
       target: ${BUILD_TARGET:-production}
     secrets: [pg_pw, redis_pw]
