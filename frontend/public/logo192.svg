@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" fill="none">
+  <rect width="192" height="192" rx="24" fill="#1f2937"/>
+  <g transform="translate(32, 32)">
+    <rect width="128" height="128" rx="16" fill="#374151"/>
+    <path d="M24 48h80v8H24v-8zm0 16h80v8H24v-8zm0 16h64v8H24v-8zm0 16h48v8H24v-8z" fill="#60a5fa"/>
+    <circle cx="88" cy="88" r="16" fill="#f59e0b"/>
+    <path d="M80 80l16 8-16 8v-16z" fill="#1f2937"/>
+  </g>
+  <text x="96" y="160" text-anchor="middle" fill="#60a5fa" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Unity AI</text>
+</svg>

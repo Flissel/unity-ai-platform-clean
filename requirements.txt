@@ -2,7 +2,7 @@
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 gunicorn==21.2.0
-pydantic==2.5.0
+pydantic>=2.10.0
 pydantic-settings==2.1.0
 
 # Database dependencies
@@ -77,11 +77,11 @@ ipdb==0.13.13
 rich==13.7.0
 
 # File handling and validation
-pillow==10.1.0
+pillow>=11.0.0
 validators==0.22.0
 
 # Async utilities
-anyio==4.1.0
+anyio==3.7.1
 trio==0.23.1
 
 # Process management
