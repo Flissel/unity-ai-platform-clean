@@ -16,7 +16,8 @@ NC='\033[0m' # No Color
 STACK_NAME="unityai"
 CONFIG_DIR="./config"
 ENV_FILE="$CONFIG_DIR/.env.production"
-COMPOSE_FILE="docker-compose.swarm.yml"
+COMPOSE_DIR="./compose"
+COMPOSE_FILE="$COMPOSE_DIR/docker-compose.swarm.yml"
 SECRETS_DIR="./secrets"
 
 echo -e "${BLUE}=== UnityAI Docker Swarm Deployment ===${NC}"
