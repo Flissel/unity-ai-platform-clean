@@ -14,7 +14,7 @@ from datetime import datetime
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
-from modules.workflow_automation.validator import (
+from modules.workflow_automation.validators import (
     WorkflowValidator,
     ValidatorConfig,
     ParameterValidator,

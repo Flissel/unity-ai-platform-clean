@@ -27,7 +27,7 @@ for i, middleware in enumerate(app.user_middleware):
     print(f"  {i}: {middleware}")
     print(f"      Type: {type(middleware)}")
     print(f"      Class: {middleware.cls}")
-    print(f"      Args: {middleware.args}")
+    print(f"      Args: {getattr(middleware, 'args', None)}")
     print(f"      Kwargs: {middleware.kwargs}")
 
 print("\nTrying to build middleware stack...")
