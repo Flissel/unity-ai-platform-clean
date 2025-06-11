@@ -1,10 +1,4 @@
-<<<<<<< HEAD
-# Replace:
- FROM docker.n8n.io/n8nio/n8n:latest
-   
 
-# Als root für Package-Installation
-=======
 # Use official n8n image as base
 FROM docker.n8n.io/n8nio/n8n:latest
 
