@@ -18,10 +18,11 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
-WORKDIR /app
+WORKDIR /app/n8n-playground
 
 # Copy dependency files
-COPY pyproject.toml requirements.txt* ./
+COPY pyproject.toml ./
+COPY n8n-playground/requirements.txt ./
 
 # Install dependencies using pip
 RUN pip install --no-cache-dir -r requirements.txt || \
@@ -58,7 +59,8 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY pyproject.toml ./
 # Create placeholder directories for missing components
 
-# Copy files if they exist
+# Copy application files
+COPY n8n-playground/ ./
 
 
 # Create necessary directories
@@ -76,7 +78,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Start command
-CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--access-log", "--log-config", "src/config/logging.yaml"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--access-log"]
 
 # Development stage
 FROM production as development
@@ -100,7 +102,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 USER unityai
 
 # Development command with hot reload
-CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--log-level", "debug"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload", "--log-level", "debug"]
 
 # Testing stage
 FROM development as testing
